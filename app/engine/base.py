@@ -9,6 +9,11 @@ class BaseEngine:
     mapping_source_questions = []
     mapping_target_questions = []
 
+
+    def __init__(self, channel, config):
+        self.channel = channel
+        self.config = config
+
     @classmethod
     def ask_connection(cls):
         return prompt(cls.connection_questions)

@@ -121,8 +121,8 @@ class Csv(BaseEngine):
     def type(cls):
         return "csv"
 
-    def __init__(self, *args, **kwargs):
-        super(Csv, self).__init__()
+    def __init__(self, channel, config):
+        super(Csv, self).__init__(channel, config)
 
 
 register(Csv)
