@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    "**/venv": true
+  },
+  "search.exclude": {
+    "**/env": true
+  },
+  "python.linting.flake8Enabled": false,
+  "python.linting.enabled": true,
+  "python.formatting.provider": "black",
+  "python.linting.pylintEnabled": true
+}
