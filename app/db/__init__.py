@@ -52,7 +52,7 @@ def get_connections(db=None):
     return connections.all()
 
 @command
-def add_mapping(name, source_connection, target_connection, source_props, target_props, db=None):
+def add_mapping(name, source_connection, target_connection, reader_conf, writer_conf, db=None):
     if get_mapping(name) is not None:
         logger.error(f"Mapping with the same name <{name}> exists")
         exit(1)
@@ -62,8 +62,8 @@ def add_mapping(name, source_connection, target_connection, source_props, target
         "name": name,
         "source_connection": source_connection,
         "target_connection": target_connection,
-        "source_props": source_props,
-        "target_props": target_props,
+        "reader_conf": reader_conf,
+        "writer_conf": writer_conf,
     })
 
 @command

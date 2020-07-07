@@ -9,80 +9,84 @@ try:
 except ImportError:
     enabled = False
 
+_connection_questions = [
+    {"type": "text", "name": "host", "message": "Host name or ip address:",},
+    {
+        "type": "text",
+        "default": "1521",
+        "name": "port",
+        "message": "Port number",
+        "validate": lambda val: val.isdigit() and int(val) in range(1, 65535),
+        "filter": lambda val: int(val),
+    },
+    {
+        "type": "select",
+        "name": "service_or_sid",
+        "message": "Will you provide 'Serivce Name' or 'SID'",
+        "choices": ["Service Name", "SID"],
+    },
+    {
+        "when": lambda x: x["service_or_sid"] == "Service Name",
+        "type": "text",
+        "name": "service_name",
+        "message": "Enter service name:",
+    },
+    {
+        "when": lambda x: x["service_or_sid"] == "SID",
+        "type": "text",
+        "name": "sid",
+        "message": "Enter sid:",
+    },
+    {"type": "text", "name": "username", "message": "Username:",},
+    {"type": "text", "name": "password", "message": "Password:",},
+]
+
+_reader_questions = [
+    {
+        "type": "text",
+        "name": "table",
+        "message": "Source table [schema.table or just table]:",
+    },
+    {
+        "type": "text",
+        "name": "columns",
+        "message": "Column names, expressions, * for all",
+        "default": "*",
+    },
+    {"type": "text", "name": "hint", "message": "Select hint:",},
+    {
+        "type": "text",
+        "name": "fetch_size",
+        "message": "Fetch size:",
+        "default": "1000",
+        "validate": lambda v: v.isdigit(),
+        "filter": lambda v: int(v),
+    },
+    {"type": "text", "name": "filter", "message": "Filter expression:",},
+]
+
+_writer_questions = [
+    {
+        "type": "text",
+        "name": "table",
+        "message": "Target table [schema.table or just table]:",
+    },
+    {
+        "type": "text",
+        "name": "batch_size",
+        "message": "Batch size:",
+        "default": "1000",
+        "validate": lambda v: v.isdigit(),
+        "filter": lambda v: int(v),
+    },
+    {"type": "text", "name": "hint", "message": "Insert hint:",},
+]
+
 
 class Oracle(BaseEngine):
-    connection_questions = BaseEngine.connection_questions + [
-        {"type": "text", "name": "host", "message": "Host name or ip address:",},
-        {
-            "type": "text",
-            "default": "1521",
-            "name": "port",
-            "message": "Port number",
-            "validate": lambda val: val.isdigit() and int(val) in range(1, 65535),
-            "filter": lambda val: int(val),
-        },
-        {
-            "type": "select",
-            "name": "service_or_sid",
-            "message": "Will you provide 'Serivce Name' or 'SID'",
-            "choices": ["Service Name", "SID"],
-        },
-        {
-            "when": lambda x: x["service_or_sid"] == "Service Name",
-            "type": "text",
-            "name": "service_name",
-            "message": "Enter service name:",
-        },
-        {
-            "when": lambda x: x["service_or_sid"] == "SID",
-            "type": "text",
-            "name": "sid",
-            "message": "Enter sid:",
-        },
-        {"type": "text", "name": "username", "message": "Username:",},
-        {"type": "text", "name": "password", "message": "Password:",},
-    ]
-
-    mapping_source_questions = BaseEngine.mapping_source_questions + [
-        {
-            "type": "text",
-            "name": "table",
-            "message": "Source table [schema.table or just table]:",
-        },
-        {
-            "type": "text",
-            "name": "columns",
-            "message": "Column names, expressions, * for all",
-            "default": "*",
-        },
-        {"type": "text", "name": "hint", "message": "Select hint:",},
-        {
-            "type": "text",
-            "name": "fetch_size",
-            "message": "Fetch size:",
-            "default": "1000",
-            "validate": lambda v: v.isdigit(),
-            "filter": lambda v: int(v),
-        },
-        {"type": "text", "name": "filter", "message": "Filter expression:",},
-    ]
-
-    mapping_target_questions = BaseEngine.mapping_target_questions + [
-        {
-            "type": "text",
-            "name": "table",
-            "message": "Target table [schema.table or just table]:",
-        },
-        {
-            "type": "text",
-            "name": "batch_size",
-            "message": "Batch size:",
-            "default": "1000",
-            "validate": lambda v: v.isdigit(),
-            "filter": lambda v: int(v),
-        },
-        {"type": "text", "name": "hint", "message": "Insert hint:",},
-    ]
+    connection_questions = BaseEngine.connection_questions + _connection_questions
+    reader_questions = BaseEngine.reader_questions + _reader_questions
+    writer_questions = BaseEngine.writer_questions + _writer_questions
 
     @classmethod
     def name(cls):
@@ -123,20 +127,22 @@ class Oracle(BaseEngine):
     def __init__(self, channel, config):
         super(Oracle, self).__init__(channel, config)
 
-    def get_select_query(self, props):
+    def get_select_query(self, rc):
         query = f"""
-            select {props["columns"]} from {props["table"]}
+            select {rc["columns"]} from {rc["table"]}
         """
-        if props["filter"] is not None:
-            return query + f" where {props['filter']}"
+        if rc["filter"] is not None:
+            return query + f" where {rc['filter']}"
 
         return query
 
-    def get_fetch_size(self, props):
-        DEFAULT_FETCH_SIZE = 1000 # todo move to settings
-        return props.get('fetch_size', self.config.get('fetch_size'), DEFAULT_FETCH_SIZE)
+    def get_fetch_size(self, rc):
+        DEFAULT_FETCH_SIZE = 1000  # todo move to settings
+        return rc.get(
+            "fetch_size", self.config.get("fetch_size"), DEFAULT_FETCH_SIZE
+        )
 
-    def read(self, props):
+    def read(self, rc):
         dsn = cx_Oracle.makedsn(
             self.config["host"],
             self.config["port"],
@@ -151,7 +157,7 @@ class Oracle(BaseEngine):
         cursor = connection.cursor()
 
         try:
-            cursor.execute(self.get_select_query(props))
+            cursor.execute(self.get_select_query(rc))
             record_count = cursor.rowcount
             if cursor.description is not None:
                 columns = [i[0] for i in cursor.description]
@@ -160,11 +166,10 @@ class Oracle(BaseEngine):
                 )
 
             while True:
-                rows = cursor.fetchmany(self.get_fetch_size(props))
+                rows = cursor.fetchmany(self.get_fetch_size(rc))
                 if not rows:
                     break
                 self.channel.put(dict(type="metadata", data=rows))
-
 
         except cx_Oracle.DatabaseError as err:
             error = "Query failed. {}.".format(str(err))

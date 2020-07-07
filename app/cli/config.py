@@ -73,13 +73,13 @@ def add_mapping():
 
     print("== Mapping Source Properties ==")
     engine = get_engine(source_conn_type)
-    source_props = engine.ask_mapping_source()
+    reader_conf = engine.ask_reader()
 
     print("== Mapping Target Properties ==")
     engine = get_engine(target_conn_type)
-    target_props = engine.ask_mapping_target()
+    writer_conf = engine.ask_writer()
 
     db.add_mapping(
-        name, source_connection, target_connection, source_props, target_props
+        name, source_connection, target_connection, reader_conf, writer_conf
     )
 
