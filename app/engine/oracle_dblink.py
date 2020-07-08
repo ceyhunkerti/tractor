@@ -91,10 +91,8 @@ class OracleDbLink(BaseEngine):
     def type(cls):
         return "oracle_dblink"
 
-    def __init__(self, *args, **kwargs):
-        super(OracleDbLink, self).__init__(*args, **kwargs)
-
-    def ask(self):
+    @classmethod
+    def ask(cls):
         connections = db.get_connections_by_type("oracle")
         if len(connections) == 0:
             logger.info(
@@ -161,6 +159,9 @@ class OracleDbLink(BaseEngine):
         )
 
         return props
+
+    def __init__(self, *args, **kwargs):
+        super(OracleDbLink, self).__init__(*args, **kwargs)
 
 
 register(OracleDbLink)

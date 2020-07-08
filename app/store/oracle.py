@@ -9,7 +9,7 @@ try:
 except ImportError:
     enabled = False
 
-_connection_questions = [
+_questions = [
     {"type": "text", "name": "host", "message": "Host name or ip address:",},
     {
         "type": "text",
@@ -41,52 +41,11 @@ _connection_questions = [
     {"type": "text", "name": "password", "message": "Password:",},
 ]
 
-_reader_questions = [
-    {
-        "type": "text",
-        "name": "table",
-        "message": "Source table [schema.table or just table]:",
-    },
-    {
-        "type": "text",
-        "name": "columns",
-        "message": "Column names, expressions, * for all",
-        "default": "*",
-    },
-    {"type": "text", "name": "hint", "message": "Select hint:",},
-    {
-        "type": "text",
-        "name": "fetch_size",
-        "message": "Fetch size:",
-        "default": "1000",
-        "validate": lambda v: v.isdigit(),
-        "filter": lambda v: int(v),
-    },
-    {"type": "text", "name": "filter", "message": "Filter expression:",},
-]
-
-_writer_questions = [
-    {
-        "type": "text",
-        "name": "table",
-        "message": "Target table [schema.table or just table]:",
-    },
-    {
-        "type": "text",
-        "name": "batch_size",
-        "message": "Batch size:",
-        "default": "1000",
-        "validate": lambda v: v.isdigit(),
-        "filter": lambda v: int(v),
-    },
-    {"type": "text", "name": "hint", "message": "Insert hint:",},
-]
-
-
 class Oracle(BaseStore):
-    connection_questions = BaseStore.connection_questions + _connection_questions
-    reader_questions = BaseStore.reader_questions + _reader_questions
-    writer_questions = BaseStore.writer_questions + _writer_questions
+
+    categories = BaseStore.categories + ['db']
+
+    questions = BaseStore.questions + _questions
 
     @classmethod
     def name(cls):
@@ -124,23 +83,23 @@ class Oracle(BaseStore):
                     arraysize=cursor.arraysize,
                 )
 
-    def __init__(self, channel, config):
-        super(Oracle, self).__init__(channel, config)
+    def __init__(self, config):
+        super(Oracle, self).__init__(config)
 
-    def get_select_query(self, rc):
-        query = f"""
-            select {rc["columns"]} from {rc["table"]}
-        """
-        if rc["filter"] is not None:
-            return query + f" where {rc['filter']}"
+    # def get_select_query(self, rc):
+    #     query = f"""
+    #         select {rc["columns"]} from {rc["table"]}
+    #     """
+    #     if rc["filter"] is not None:
+    #         return query + f" where {rc['filter']}"
 
-        return query
+    #     return query
 
-    def get_fetch_size(self, rc):
-        DEFAULT_FETCH_SIZE = 1000  # todo move to settings
-        return rc.get(
-            "fetch_size", self.config.get("fetch_size"), DEFAULT_FETCH_SIZE
-        )
+    # def get_fetch_size(self, rc):
+    #     DEFAULT_FETCH_SIZE = 1000  # todo move to settings
+    #     return rc.get(
+    #         "fetch_size", self.config.get("fetch_size"), DEFAULT_FETCH_SIZE
+    #     )
 
     def get_connection(self):
         dsn = cx_Oracle.makedsn(
@@ -155,42 +114,42 @@ class Oracle(BaseStore):
         connection.outputtypehandler = Oracle.output_handler
         return connection
 
-    def read(self, rc):
-        dsn = cx_Oracle.makedsn(
-            self.config["host"],
-            self.config["port"],
-            sid=self.config.get("sid", None),
-            service_name=self.config.get("service_name", None),
-        )
+    # def read(self, rc):
+        # dsn = cx_Oracle.makedsn(
+        #     self.config["host"],
+        #     self.config["port"],
+        #     sid=self.config.get("sid", None),
+        #     service_name=self.config.get("service_name", None),
+        # )
 
-        connection = cx_Oracle.connect(
-            user=self.config["username"], password=self.config["password"], dsn=dsn
-        )
-        connection.outputtypehandler = Oracle.output_handler
-        cursor = connection.cursor()
+        # connection = cx_Oracle.connect(
+        #     user=self.config["username"], password=self.config["password"], dsn=dsn
+        # )
+        # connection.outputtypehandler = Oracle.output_handler
+        # cursor = connection.cursor()
 
-        try:
-            cursor.execute(self.get_select_query(rc))
-            record_count = cursor.rowcount
-            if cursor.description is not None:
-                columns = [i[0] for i in cursor.description]
-                self.channel.put(
-                    dict(type="metadata", record_count=record_count, data=columns)
-                )
+        # try:
+        #     cursor.execute(self.get_select_query(rc))
+        #     record_count = cursor.rowcount
+        #     if cursor.description is not None:
+        #         columns = [i[0] for i in cursor.description]
+        #         self.channel.put(
+        #             dict(type="metadata", record_count=record_count, data=columns)
+        #         )
 
-            while True:
-                rows = cursor.fetchmany(self.get_fetch_size(rc))
-                if not rows:
-                    break
-                self.channel.put(dict(type="metadata", data=rows))
+        #     while True:
+        #         rows = cursor.fetchmany(self.get_fetch_size(rc))
+        #         if not rows:
+        #             break
+        #         self.channel.put(dict(type="metadata", data=rows))
 
-        except cx_Oracle.DatabaseError as err:
-            error = "Query failed. {}.".format(str(err))
-        except KeyboardInterrupt:
-            connection.cancel()
-            raise
-        finally:
-            connection.close()
+        # except cx_Oracle.DatabaseError as err:
+        #     error = "Query failed. {}.".format(str(err))
+        # except KeyboardInterrupt:
+        #     connection.cancel()
+        #     raise
+        # finally:
+        #     connection.close()
 
 
 register(Oracle)

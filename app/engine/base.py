@@ -4,6 +4,10 @@ class BaseEngine:
     questions = []
 
     @classmethod
+    def category(cls):
+        return 'generic'
+
+    @classmethod
     def name(cls):
         return cls.__name__
 
@@ -18,5 +22,6 @@ class BaseEngine:
     def __init__(self, *args, **kwargs):
         pass
 
-    def ask(self):
-        prompt(self.questions)
+    @classmethod
+    def ask(cls):
+        prompt(cls.questions)

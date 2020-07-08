@@ -2,30 +2,15 @@ import questionary
 from questionary import prompt
 
 class BaseStore:
-    connection_questions = [
+    categories = ['generic']
+
+    questions = [
         {"type": "text", "name": "name", "message": "Connection name:"}
     ]
 
-    reader_questions = []
-    writer_questions = []
+    @classmethod
+    def ask(cls):
+        return prompt(cls.questions)
 
-
-    def __init__(self, channel, config):
-        self.channel = channel
+    def __init__(self, config):
         self.config = config
-
-    @classmethod
-    def ask_connection(cls):
-        return prompt(cls.connection_questions)
-
-    @classmethod
-    def ask_reader(cls):
-        return prompt(cls.reader_questions)
-
-    @classmethod
-    def ask_writer(cls):
-        return prompt(cls.writer_questions)
-
-
-    def run_query(self):
-        raise NotImplementedError()
