@@ -33,7 +33,7 @@ def describe(db=None):
 
 
 @command
-def add_connection(name, engine_type, props, db=None):
+def add_connection(name, store_type, props, db=None):
     if get_connection(name) is not None:
         logger.error(f"Connection with the same name <{name}> exists")
         exit(1)
@@ -42,7 +42,7 @@ def add_connection(name, engine_type, props, db=None):
     connections = db.table('connections')
     connections.insert({
         "name": name,
-        "type": engine_type,
+        "type": store_type,
         "props": props
     })
 
@@ -50,6 +50,12 @@ def add_connection(name, engine_type, props, db=None):
 def get_connections(db=None):
     connections = db.table('connections')
     return connections.all()
+
+@command
+def get_connections_by_type(_type, db=None):
+    Connection = Query()
+    connections = db.table('connections')
+    return connections.search(Connection.type == _type)
 
 @command
 def add_mapping(name, source_connection, target_connection, reader_conf, writer_conf, db=None):

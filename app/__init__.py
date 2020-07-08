@@ -3,6 +3,7 @@ import logging
 import sys
 from .cli import dumper
 from . import settings
+from app.store import import_stores
 from app.engine import import_engines
 
 def setup_logging():
@@ -14,4 +15,5 @@ def setup_logging():
 
 setup_logging()
 
-engines = import_engines(settings.ENGINES)
+import_stores(settings.STORES)
+import_engines(settings.ENGINES)

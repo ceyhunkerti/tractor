@@ -3,14 +3,14 @@ import click
 import questionary as q
 
 from app import db
-from app.engine import engines, get_engine
+from app.store import stores, get_store
 from app import settings
 
 logger = logging.getLogger("config")
 
 
-def get_engine_types():
-    return {e.name(): e.type() for _, e in engines.items()}
+def get_store_types():
+    return {e.name(): e.type() for _, e in stores.items()}
 
 
 # Command Group
@@ -33,13 +33,13 @@ def add():
 
 @add.command(name="connection", help="Add new connection")
 def add_connection():
-    engine_types = get_engine_types()
-    et = q.select("Select connection type", choices=engine_types.keys()).ask()
+    store_types = get_store_types()
+    et = q.select("Select connection type", choices=store_types.keys()).ask()
 
-    engine_type = engine_types.get(et)
-    engine = get_engine(engine_type)
-    props = engine.ask_connection()
-    db.add_connection(props["name"], engine_type, props)
+    store_type = store_types.get(et)
+    store = get_store(store_type)
+    props = store.ask_connection()
+    db.add_connection(props["name"], store_type, props)
 
 
 @add.command(name="mapping", help="Add new mapping")
@@ -72,12 +72,12 @@ def add_mapping():
     target_conn_type = db.get_connection(target_connection)["type"]
 
     print("== Mapping Source Properties ==")
-    engine = get_engine(source_conn_type)
-    reader_conf = engine.ask_reader()
+    store = get_store(source_conn_type)
+    reader_conf = store.ask_reader()
 
     print("== Mapping Target Properties ==")
-    engine = get_engine(target_conn_type)
-    writer_conf = engine.ask_writer()
+    store = get_store(target_conn_type)
+    writer_conf = store.ask_writer()
 
     db.add_mapping(
         name, source_connection, target_connection, reader_conf, writer_conf

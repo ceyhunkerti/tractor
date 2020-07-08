@@ -1,5 +1,5 @@
 import questionary
-from .base import BaseEngine
+from .base import BaseStore
 from . import register
 
 try:
@@ -83,10 +83,10 @@ _writer_questions = [
 ]
 
 
-class Oracle(BaseEngine):
-    connection_questions = BaseEngine.connection_questions + _connection_questions
-    reader_questions = BaseEngine.reader_questions + _reader_questions
-    writer_questions = BaseEngine.writer_questions + _writer_questions
+class Oracle(BaseStore):
+    connection_questions = BaseStore.connection_questions + _connection_questions
+    reader_questions = BaseStore.reader_questions + _reader_questions
+    writer_questions = BaseStore.writer_questions + _writer_questions
 
     @classmethod
     def name(cls):
@@ -141,6 +141,19 @@ class Oracle(BaseEngine):
         return rc.get(
             "fetch_size", self.config.get("fetch_size"), DEFAULT_FETCH_SIZE
         )
+
+    def get_connection(self):
+        dsn = cx_Oracle.makedsn(
+            self.config["host"],
+            self.config["port"],
+            sid=self.config.get("sid", None),
+            service_name=self.config.get("service_name", None),
+        )
+        connection = cx_Oracle.connect(
+            user=self.config["username"], password=self.config["password"], dsn=dsn
+        )
+        connection.outputtypehandler = Oracle.output_handler
+        return connection
 
     def read(self, rc):
         dsn = cx_Oracle.makedsn(

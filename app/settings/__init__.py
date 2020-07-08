@@ -10,23 +10,37 @@ LOG_FORMAT = os.environ.get(
     LOG_PREFIX + "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s",
 )
 
-default_engines = [
-    "app.engine.oracle",
-    "app.engine.csv",
+default_stores = [
+    "app.store.oracle",
+    "app.store.csv",
 ]
+enabled_stores = array_from_string(
+    os.environ.get("DUMPER_ENABLED_STORES", ",".join(default_stores))
+)
+additional_stores = array_from_string(
+    os.environ.get("DUMPER_ADDITIONAL_STORES", "")
+)
+disabled_stores = array_from_string(
+    os.environ.get("DUMPER_DISABLED_STORES", "")
+)
+STORES = remove(
+    set(disabled_stores),
+    distinct(enabled_stores + additional_stores),
+)
 
+
+default_engines = [
+    "app.engine.oracle_dblink",
+]
 enabled_engines = array_from_string(
     os.environ.get("DUMPER_ENABLED_ENGINES", ",".join(default_engines))
 )
-
 additional_engines = array_from_string(
     os.environ.get("DUMPER_ADDITIONAL_ENGINES", "")
 )
-
 disabled_engines = array_from_string(
     os.environ.get("DUMPER_DISABLED_ENGINES", "")
 )
-
 ENGINES = remove(
     set(disabled_engines),
     distinct(enabled_engines + additional_engines),

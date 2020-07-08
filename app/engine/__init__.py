@@ -7,9 +7,7 @@ def import_engines(engines):
     for engine in engines:
         __import__(engine)
 
-
 engines = {}
-
 
 def register(engine):
     global engines
@@ -17,10 +15,10 @@ def register(engine):
         logger.debug(
             "Registering %s (%s) engine.", engine.name(), engine.type(),
         )
-        engines[engine.type()] = engine
+        engine[engine.type()] = engine
     else:
         logger.debug(
-            "%s engine enabled but not supported, not registering. Either disable or install missing "
+            "%s store enabled but not supported, not registering. Either disable or install missing "
             "dependencies.",
             engine.name(),
         )

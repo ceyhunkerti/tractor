@@ -1,5 +1,5 @@
 import questionary
-from .base import BaseEngine
+from .base import BaseStore
 from . import register
 
 try:
@@ -10,8 +10,8 @@ except ImportError:
     enabled = False
 
 
-class Csv(BaseEngine):
-    connection_questions = BaseEngine.connection_questions + [
+class Csv(BaseStore):
+    connection_questions = BaseStore.connection_questions + [
         {"type": "text", "name": "path", "message": "Path to folder:",},
         {
             "type": "text",
@@ -35,7 +35,7 @@ class Csv(BaseEngine):
         },
     ]
 
-    mapping_source_questions = BaseEngine.connection_questions + [
+    mapping_source_questions = BaseStore.connection_questions + [
         {
             "type": "text",
             "name": "file_name",
@@ -72,7 +72,7 @@ class Csv(BaseEngine):
         },
     ]
 
-    mapping_target_questions = BaseEngine.connection_questions + [
+    mapping_target_questions = BaseStore.connection_questions + [
         {
             "type": "text",
             "name": "file_name",
