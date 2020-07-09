@@ -15,7 +15,7 @@ def register(engine):
         logger.debug(
             "Registering %s (%s) engine.", engine.name(), engine.type(),
         )
-        engine[engine.type()] = engine
+        engines[engine.type()] = engine
     else:
         logger.debug(
             "%s store enabled but not supported, not registering. Either disable or install missing "
@@ -24,8 +24,4 @@ def register(engine):
         )
 
 def get_engine(engine_type):
-    engine_class = engines.get(engine_type, None)
-    if engine_class is None:
-        return None
-
-    return engine_class()
+    return engines.get(engine_type, None)

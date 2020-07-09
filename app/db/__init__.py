@@ -1,7 +1,9 @@
+import re
 import logging
 
-from funcy import first, is_list
-from tinydb import TinyDB, Query
+from slugify import slugify
+from funcy import first, is_list, omit
+from tinydb import TinyDB, Query, where
 from .storage.yaml_storage import YAMLStorage
 
 
@@ -35,14 +37,27 @@ def describe(db=None):
 
 
 @command
-def add_connection(name, store_type, props, db=None):
-    if get_connection(name) is not None:
-        logger.error(f"Connection with the same name <{name}> exists")
+def add_connection(name, store_type, categories, props, db=None):
+    slug = props.get("slug", slugify(name))
+
+    if is_connection_exists(name, slug) == True:
+        logger.error(
+            f"Connection with the same name <{name}> or slug <{slug}> already exists!"
+        )
         exit(1)
 
     logger.info(f"Adding connection {name} ...")
     connections = db.table("connections")
-    connections.insert({"name": name, "type": store_type, "props": props})
+    connections.insert(
+        {
+            "name": name,
+            "slug": slug,
+            "type": store_type,
+            "categories": categories,
+            "props": omit(props, ["slug"]),
+        }
+    )
+    logger.info(f"✓ Success")
 
 
 @command
@@ -64,7 +79,11 @@ def get_connections_by_category(categories, db=None):
         categories = [categories]
 
     connections = db.table("connections").all()
-    return [c for c in connections if list(set(c.categories) & set(categories)) > 0]
+    return [
+        c
+        for c in connections
+        if len(list(set(c.get("categories", ["generic"])) & set(categories))) > 0
+    ]
 
 
 @command
@@ -88,10 +107,38 @@ def add_mapping(
 
 
 @command
-def get_connection(name, db=None):
+def get_connection(name, ignore_case=True, db=None):
     Connection = Query()
     connections = db.table("connections")
-    return first(connections.search(Connection.name == name))
+    if not ignore_case:
+        return first(connections.search(Connection.name == name))
+    else:
+        return first(
+            connections.search(Connection.name.matches(name, flags=re.IGNORECASE))
+        )
+
+
+@command
+def get_connection_by_slug(slug, ignore_case=True, db=None):
+    Connection = Query()
+    connections = db.table("connections")
+    if not ignore_case:
+        return first(connections.search(Connection.slug == slug))
+    else:
+        return first(
+            connections.search(Connection.name.matches(slug, flags=re.IGNORECASE))
+        )
+
+
+@command
+def is_connection_exists(name, slug, db=None):
+    Connection = Query()
+    connections = db.table("connections")
+    result = connections.search(
+        Connection.name.matches(name, flags=re.IGNORECASE)
+        | Connection.name.matches(name, flags=re.IGNORECASE)
+    )
+    return len(result) > 0
 
 
 @command
@@ -99,3 +146,13 @@ def get_mapping(name, db=None):
     Mapping = Query()
     mappings = db.table("mappings")
     return first(mappings.search(Mapping.name == name))
+
+
+@command
+def remove_connection_by_name_or_slug(name_or_slug, db=None):
+    logger.info(f"Removing connection {name_or_slug}")
+    connections = db.table("connections")
+    connections.remove(
+        (where("slug") == name_or_slug) | (where("name") == name_or_slug)
+    )
+    logger.info("✓ Success")

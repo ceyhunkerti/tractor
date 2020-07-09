@@ -1,11 +1,18 @@
 import questionary
 from questionary import prompt
+from app.util import required
+
 
 class BaseStore:
-    categories = ['generic']
+    categories = ["generic"]
 
     questions = [
-        {"type": "text", "name": "name", "message": "Connection name:"}
+        {
+            "type": "text",
+            "name": "name",
+            "message": "Connection name:",
+            "validate": required,
+        }
     ]
 
     @classmethod

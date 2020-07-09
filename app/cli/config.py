@@ -1,8 +1,10 @@
 import logging
 import click
 import questionary as q
+from funcy import omit
 
 from app import db
+from app.engine import engines, get_engine
 from app.store import stores, get_store
 from app import settings
 
@@ -10,76 +12,51 @@ logger = logging.getLogger("config")
 
 
 def get_store_types():
-    return {e.name(): e.type() for _, e in stores.items()}
+    return {s.name(): s.type() for _, s in stores.items()}
 
 
-# Command Group
-@click.group()
-def config():
-    """Repository commands"""
-    pass
+def get_engine_types():
+    return {e.name(): e.type() for _, e in engines.items()}
 
 
-@config.command(name="describe", help="Show configuration contents")
+@click.command(name="describe", help="Show configuration contents")
 def describe():
     db.describe()
 
 
-@config.group()
+@click.group()
 def add():
-    """Repository commands"""
+    """Add config commands"""
+    pass
+
+@click.group()
+def remove():
+    """Delete config commands"""
     pass
 
 
 @add.command(name="connection", help="Add new connection")
 def add_connection():
     store_types = get_store_types()
-    et = q.select("Select connection type", choices=store_types.keys()).ask()
+    store_name = q.select("Select connection type", choices=store_types.keys()).ask()
 
-    store_type = store_types.get(et)
+    store_type = store_types.get(store_name)
     store = get_store(store_type)
-    props = store.ask_connection()
-    db.add_connection(props["name"], store_type, props)
+    props = store.ask()
+    db.add_connection(props["name"], store_type, store.categories, omit(props, ['name']))
+
+
+@remove.command(name="connection", help="Delete connection")
+@click.argument('name_or_slug')
+def delete_connection(name_or_slug):
+    db.remove_connection_by_name_or_slug(name_or_slug)
+
 
 
 @add.command(name="mapping", help="Add new mapping")
 def add_mapping():
-    connections = db.get_connections()
-
-    if len(connections) == 0:
-        logger.info(
-            """
-            Create connections first.
-            You can run the following command to create connection.
-
-            dumper config add connection
-        """
-        )
-        exit(1)
-
-    name = q.text(
-        "Mapping name:", validate=lambda x: x is not None or x.strip() != ""
-    ).ask()
-
-    source_connection = q.select(
-        "Select source connection", choices=[c["name"] for c in connections]
-    ).ask()
-    source_conn_type = db.get_connection(source_connection)["type"]
-
-    target_connection = q.select(
-        "Select target connection", choices=[c["name"] for c in connections]
-    ).ask()
-    target_conn_type = db.get_connection(target_connection)["type"]
-
-    print("== Mapping Source Properties ==")
-    store = get_store(source_conn_type)
-    reader_conf = store.ask_reader()
-
-    print("== Mapping Target Properties ==")
-    store = get_store(target_conn_type)
-    writer_conf = store.ask_writer()
-
-    db.add_mapping(
-        name, source_connection, target_connection, reader_conf, writer_conf
-    )
-
+    engine_types = get_engine_types()
+    engine_name = q.select("Select engine", choices=engine_types.keys()).ask()
+    engine_type = engine_types.get(engine_name)
+    engine = get_engine(engine_type)
+    print(engine.ask())

@@ -31,6 +31,7 @@ STORES = remove(
 
 default_engines = [
     "app.engine.oracle_dblink",
+    "app.engine.sql",
 ]
 enabled_engines = array_from_string(
     os.environ.get("DUMPER_ENABLED_ENGINES", ",".join(default_engines))
@@ -45,3 +46,9 @@ ENGINES = remove(
     set(disabled_engines),
     distinct(enabled_engines + additional_engines),
 )
+
+
+# default csv params if no delimiter is given for mappings and connections
+CSV_FIELD_DELIMITER = os.environ.get("DUMPER_CSV_FIELD_DELIMITER", ",")
+CSV_RECORD_DELIMITER = os.environ.get("DUMPER_CSV_RECORD_DELIMITER", "\\n")
+CSV_PATH = os.environ.get("DUMPER_CSV_PATH", "/tmp")

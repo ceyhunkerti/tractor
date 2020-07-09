@@ -1,113 +1,32 @@
 import questionary
 from .base import BaseStore
 from . import register
+from app.util import required
+from app import settings
 
-try:
-    import cx_Oracle
-
-    enabled = True
-except ImportError:
-    enabled = False
-
+_questions = [
+    {
+        "type": "text",
+        "name": "path",
+        "message": "Path to folder:",
+        "default": settings.CSV_PATH
+    },
+    {
+        "type": "text",
+        "name": "field_delimiter",
+        "message": "Field delimiter:",
+        "default": settings.CSV_FIELD_DELIMITER
+    },
+    {
+        "type": "text",
+        "name": "record_delimiter",
+        "message": "Record delimiter:",
+        "default": settings.CSV_RECORD_DELIMITER
+    }
+]
 
 class Csv(BaseStore):
-    connection_questions = BaseStore.connection_questions + [
-        {"type": "text", "name": "path", "message": "Path to folder:",},
-        {
-            "type": "text",
-            "default": ",",
-            "name": "field_delimiter",
-            "message": "Field delimiter:",
-        },
-        {
-            "type": "text",
-            "default": "\\n",
-            "name": "record_delimiter",
-            "message": "Record delimiter:",
-        },
-        {
-            "type": "text",
-            "name": "skip",
-            "message": "Skip header:",
-            "default": "0",
-            "validate": lambda v: v.isdigit(),
-            "filter": lambda v: int(v)
-        },
-    ]
-
-    mapping_source_questions = BaseStore.connection_questions + [
-        {
-            "type": "text",
-            "name": "file_name",
-            "message": "File name:",
-        },
-        {
-            "type": "select",
-            "name": "use_defaults",
-            "message": "Use connection defaults (eg. delimiters, skip, etc.)",
-            "choices": ["Yes", "No"]
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "default": ",",
-            "name": "field_delimiter",
-            "message": "Field delimiter:",
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "default": "\\n",
-            "name": "record_delimiter",
-            "message": "Record delimiter:",
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "name": "skip",
-            "message": "Skip header:",
-            "default": "0",
-            "validate": lambda v: v.isdigit(),
-            "filter": lambda v: int(v)
-        },
-    ]
-
-    mapping_target_questions = BaseStore.connection_questions + [
-        {
-            "type": "text",
-            "name": "file_name",
-            "message": "File name:",
-        },
-        {
-            "type": "select",
-            "name": "use_defaults",
-            "message": "Use connection defaults (eg. delimiters, skip, etc.)",
-            "choices": ["Yes", "No"]
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "default": ",",
-            "name": "field_delimiter",
-            "message": "Field delimiter:",
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "default": "\\n",
-            "name": "record_delimiter",
-            "message": "Record delimiter:",
-        },
-        {
-            "when": lambda x: x['use_defaults'] == 'No',
-            "type": "text",
-            "name": "skip",
-            "message": "Skip header:",
-            "default": "0",
-            "validate": lambda v: v.isdigit(),
-            "filter": lambda v: int(v)
-        },
-    ]
+    questions = BaseStore.questions + _questions
 
     @classmethod
     def name(cls):
@@ -115,14 +34,14 @@ class Csv(BaseStore):
 
     @classmethod
     def enabled(cls):
-        return enabled
+        return True
 
     @classmethod
     def type(cls):
         return "csv"
 
-    def __init__(self, channel, config):
-        super(Csv, self).__init__(channel, config)
+    def __init__(self, config):
+        super(Csv, self).__init__(config)
 
 
 register(Csv)

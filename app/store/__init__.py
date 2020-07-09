@@ -25,8 +25,4 @@ def register(store):
         )
 
 def get_store(store_type):
-    store_class = stores.get(store_type, None)
-    if store_class is None:
-        return None
-
-    return store_class()
+    return stores.get(store_type, None)
