@@ -3,10 +3,9 @@ import click
 import questionary as q
 from funcy import omit
 
-from app import db
+from app import repo
 from app.engine import engines, get_engine
 from app.store import stores, get_store
-from app import settings
 
 logger = logging.getLogger("config")
 
@@ -21,18 +20,16 @@ def get_engine_types():
 
 @click.command(name="describe", help="Show configuration contents")
 def describe():
-    db.describe()
+    repo.describe()
 
 
 @click.group()
 def add():
     """Add config commands"""
-    pass
 
 @click.group()
 def remove():
     """Delete config commands"""
-    pass
 
 
 @add.command(name="connection", help="Add new connection")
@@ -43,13 +40,13 @@ def add_connection():
     store_type = store_types.get(store_name)
     store = get_store(store_type)
     props = store.ask()
-    db.add_connection(props["name"], store_type, store.categories, omit(props, ['name']))
+    repo.add_connection(props["name"], store_type, store.categories, omit(props, ['name']))
 
 
 @remove.command(name="connection", help="Delete connection")
 @click.argument('name_or_slug')
 def delete_connection(name_or_slug):
-    db.remove_connection_by_name_or_slug(name_or_slug)
+    repo.remove_connection_by_name_or_slug(name_or_slug)
 
 
 
@@ -59,4 +56,5 @@ def add_mapping():
     engine_name = q.select("Select engine", choices=engine_types.keys()).ask()
     engine_type = engine_types.get(engine_name)
     engine = get_engine(engine_type)
-    print(engine.ask())
+    props = engine.ask()
+    repo.add_mapping(props['name'], props)

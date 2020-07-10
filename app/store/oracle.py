@@ -1,14 +1,13 @@
-import questionary
-from .base import BaseStore
-from . import register
 from app.util import required
+from .base import BaseStore
+from . import registery
 
 try:
     import cx_Oracle
 
-    enabled = True
+    ENABLED = True
 except ImportError:
-    enabled = False
+    ENABLED = False
 
 
 _questions = [
@@ -24,7 +23,7 @@ _questions = [
         "name": "port",
         "message": "Port number",
         "validate": lambda val: val.isdigit() and int(val) in range(1, 65535),
-        "filter": lambda val: int(val),
+        "filter": int,
     },
     {
         "type": "select",
@@ -68,7 +67,7 @@ class Oracle(BaseStore):
 
     @classmethod
     def enabled(cls):
-        return enabled
+        return ENABLED
 
     @classmethod
     def type(cls):
@@ -78,29 +77,8 @@ class Oracle(BaseStore):
     def _convert_number(cls, value):
         try:
             return int(value)
-        except:
+        except:  # pylint: disable=bare-except
             return value
-
-    @classmethod
-    def output_handler(cls, cursor, name, default_type, length, precision, scale):
-        if default_type in (cx_Oracle.CLOB, cx_Oracle.LOB):
-            return cursor.var(cx_Oracle.LONG_STRING, 80000, cursor.arraysize)
-
-        if default_type in (cx_Oracle.STRING, cx_Oracle.FIXED_CHAR):
-            return cursor.var(str, length, cursor.arraysize)
-
-        if default_type == cx_Oracle.NUMBER:
-            if scale <= 0:
-                return cursor.var(
-                    cx_Oracle.STRING,
-                    255,
-                    outconverter=Oracle._convert_number,
-                    arraysize=cursor.arraysize,
-                )
-
-    def __init__(self, config):
-        super(Oracle, self).__init__(config)
-
 
     def get_connection(self):
         dsn = cx_Oracle.makedsn(
@@ -112,9 +90,7 @@ class Oracle(BaseStore):
         connection = cx_Oracle.connect(
             user=self.config["username"], password=self.config["password"], dsn=dsn
         )
-        connection.outputtypehandler = Oracle.output_handler
         return connection
 
 
-
-register(Oracle)
+registery.register(Oracle)

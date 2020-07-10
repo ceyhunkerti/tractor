@@ -2,9 +2,10 @@ import logging
 import questionary as q
 from questionary import Choice
 
-from app import db
+from app.engine import registery
+from app import repo
 from .base import BaseEngine
-from app.engine import register
+
 
 logger = logging.getLogger("engine.sql")
 
@@ -15,7 +16,7 @@ class Sql(BaseEngine):
 
     @classmethod
     def ask(cls):
-        connections = db.get_connections_by_category("db")
+        connections = repo.get_connections_by_category("db")
         if len(connections) == 0:
             logger.info(
                 """
@@ -23,7 +24,7 @@ class Sql(BaseEngine):
                 Create connections first.
                 You can run the following command to create connection.
 
-                dumper config add connection
+                tractor config add connection
             """
             )
             exit(1)
@@ -57,13 +58,13 @@ class Sql(BaseEngine):
             "Fetch size:",
             default="1000",
             validate=lambda v: v.isdigit(),
-            filter=lambda v: int(v),
+            filter=int,
         )
         batch_size = q.text(
             "Batch size:",
             default="1000",
             validate=lambda v: v.isdigit(),
-            filter=lambda v: int(v),
+            filter=int,
         )
 
         create_target_table = q.select(
@@ -95,4 +96,4 @@ class Sql(BaseEngine):
             ),
         )
 
-register(Sql)
+registery.register(Sql)

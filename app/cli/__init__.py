@@ -1,10 +1,11 @@
 import click
 
-from .config import config
+from .config import add, remove
 from app import settings
 
 @click.group()
-def dumper():
-    """Dumper"""
+def tractor():
+    """Tractor"""
 
-dumper.add_command(config)
+tractor.add_command(add)
+tractor.add_command(remove)

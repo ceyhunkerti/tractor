@@ -7,7 +7,6 @@ logger = logging.getLogger("yaml_storage")
 class YAMLStorage(Storage):
     def __init__(self, filename):
         self.snapshot = None
-        self.error = None
         self.write_error = False
         self.filename = filename
 
@@ -26,9 +25,9 @@ class YAMLStorage(Storage):
         with open(self.filename, 'w+') as handle:
             try:
                 yaml.dump(data, handle)
-            except Exception as e:
-                self.write_error = True
-                self.error = e
+            except Exception as error:
+                self.rollback()
+                raise error
 
     def rollback(self):
         if self.snapshot is not None:
@@ -40,7 +39,4 @@ class YAMLStorage(Storage):
             logger.debug("Snapshot is empty")
 
     def close(self):
-        if self.write_error:
-            logger.debug("Write error")
-            self.rollback()
-            raise self.error
+        pass

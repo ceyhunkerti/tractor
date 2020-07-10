@@ -1,4 +1,3 @@
-import questionary
 from questionary import prompt
 from app.util import required
 

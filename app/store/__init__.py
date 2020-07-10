@@ -8,21 +8,24 @@ def import_stores(stores):
         __import__(store)
 
 
-stores = {}
+class Registery:
+    def __init__(self):
+        self.registery = dict()
 
-def register(store):
-    global stores
-    if store.enabled():
-        logger.debug(
-            "Registering %s (%s) store.", store.name(), store.type(),
-        )
-        stores[store.type()] = store
-    else:
-        logger.debug(
-            "%s store enabled but not supported, not registering. Either disable or install missing "
-            "dependencies.",
-            store.name(),
-        )
+    def register(self, store):
+        if store.enabled():
+            logger.debug(
+                "Registering %s (%s) store.", store.name(), store.type(),
+            )
+            self.registery[store.type()] = store
+        else:
+            logger.debug(
+                """%s store enabled but not supported, not registering.
+                Either disable or install missing dependencies.""",
+                store.name(),
+            )
 
-def get_store(store_type):
-    return stores.get(store_type, None)
+    def get_store(self, store_type):
+        return self.registery.get(store_type, None)
+
+registery = Registery()

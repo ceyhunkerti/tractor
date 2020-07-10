@@ -1,10 +1,10 @@
 import os
 import logging
 import sys
-from .cli import dumper
-from . import settings
 from app.store import import_stores
 from app.engine import import_engines
+from .cli import tractor
+from . import settings
 
 def setup_logging():
     handler = logging.StreamHandler(sys.stdout if settings.LOG_STDOUT else sys.stderr)

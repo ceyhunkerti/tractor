@@ -8,5 +8,8 @@
   "python.linting.flake8Enabled": false,
   "python.linting.enabled": true,
   "python.formatting.provider": "black",
-  "python.linting.pylintEnabled": true
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": [
+    "--enable=W0614"
+  ]
 }
