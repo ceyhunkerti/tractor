@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from app.util import required
 from .base import BaseStore
 from . import registery
@@ -54,12 +55,22 @@ _questions = [
     },
 ]
 
+_settings = {
+    "scan": {
+        "db_links": ['LNK_ODIVM2'],
+        "object_types": ['VIEW', 'TABLE'],
+        "schemas": ['TRUCK']
+    }
+}
+
 
 class Oracle(BaseStore):
 
     categories = BaseStore.categories + ["db"]
 
     questions = BaseStore.questions + _questions
+
+    settings = {**BaseStore.settings, **_settings}
 
     @classmethod
     def name(cls):
@@ -91,6 +102,39 @@ class Oracle(BaseStore):
             user=self.config["username"], password=self.config["password"], dsn=dsn
         )
         return connection
+
+    @contextmanager
+    def open_connection(self):
+        connection = self.get_connection()
+        try:
+            yield connection
+        finally:
+            connection.close()
+
+
+    def self_scan(self, object_types):
+        with self.open_connection() as conn:
+            query = f"""
+                select object_name, object_type
+                from all_objects
+                where object_type in ('TABLE', 'VIEW')
+                and owner not in ({",".join(["'" + t + "'" for t in object_types])})
+            """
+            cursor = conn.cursor()
+            cursor.execute(query)
+
+            result = [{'name': f"{r[0]} - {r[1]}", "value": r[0]} for r in cursor]
+
+        return result
+
+    def scan(self, settings=None):
+        settings = self.settings if settings is None else settings
+        if not settings.scan:
+            return None
+
+        index = dict(items=self.self_scan(settings))
+
+        return index
 
 
 registery.register(Oracle)

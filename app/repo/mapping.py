@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from slugify import slugify
 from funcy import first
 from tinydb import Query
 from app.repo import db
@@ -13,22 +14,22 @@ __all__ = [
 ]
 
 
-def add_mapping(name, source_connection, target_connection, reader_conf, writer_conf):
+def add_mapping(name, engine, props):
     if get_mapping(name) is not None:
         logger.error("Mapping with the same name <%s> exists", name)
         sys.exit(1)
 
+    logger.info("Adding mapping...")
     mappings = db.table("mappings")
     mappings.insert(
         {
             "name": name,
-            "source_connection": source_connection,
-            "target_connection": target_connection,
-            "reader_conf": reader_conf,
-            "writer_conf": writer_conf,
+            "slug": slugify(name),
+            "engine": engine,
+            "props": props
         }
     )
-
+    logger.info("✓ Success")
 
 def get_mapping(name):
     mapping = Query()

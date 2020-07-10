@@ -6,27 +6,37 @@ from slugify import slugify
 from funcy import first, is_list, omit
 from tinydb import Query, where
 from app.repo import db
+from app.store import registery
 
 logger = logging.getLogger("repository.connection")
 
 
 __all__ = [
+    "scan",
+    "get_connection",
+    "get_connection_by_name_or_slug",
     "get_connections",
-    "get_connections_by_type",
+    "get_connections_by_store",
     "get_connections_by_category",
     "add_connection",
     "remove_connection_by_name_or_slug"
 ]
+
+def scan(name):
+    connection = get_connection(name)
+    store_class = registery.get_item_by_name(name)
+    store = store_class(connection['props'])
+    store.scan()
 
 def get_connections():
     connections = db.table("connections")
     return connections.all()
 
 
-def get_connections_by_type(_type):
+def get_connections_by_store(store):
     connection = Query()
     connections = db.table("connections")
-    return connections.search(connection.type == _type)
+    return connections.search(connection.store == store)
 
 
 def get_connections_by_category(categories):
@@ -41,7 +51,7 @@ def get_connections_by_category(categories):
     ]
 
 
-def add_connection(name, store_type, categories, props):
+def add_connection(name, store, categories, props, settings=None):
     slug = props.get("slug", slugify(name))
 
     if is_connection_exists(name, slug):
@@ -58,9 +68,10 @@ def add_connection(name, store_type, categories, props):
         {
             "name": name,
             "slug": slug,
-            "type": store_type,
+            "store": store,
             "categories": categories,
             "props": omit(props, ["slug"]),
+            "settings": settings
         }
     )
     logger.info("✓ Success")
@@ -76,6 +87,19 @@ def get_connection(name, ignore_case=True):
         connections.search(connection.name.matches(name, flags=re.IGNORECASE))
     )
 
+def get_connection_by_name_or_slug(name_or_slug, ignore_case=True):
+    connection = Query()
+    connections = db.table("connections")
+    if not ignore_case:
+        result = connections.search(
+            (where("slug") == name_or_slug) | (where("name") == name_or_slug))
+    else:
+        result = connections.search(
+            connection.name.matches(name_or_slug, flags=re.IGNORECASE) |
+            connection.slug.matches(name_or_slug, flags=re.IGNORECASE)
+        )
+
+    return first(result)
 
 def get_connection_by_slug(slug, ignore_case=True):
     connection = Query()

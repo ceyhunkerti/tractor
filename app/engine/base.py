@@ -19,8 +19,8 @@ class BaseEngine:
     def enabled(cls):
         return True
 
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, config=None):
+        self.config = config
 
     @classmethod
     def ask(cls):

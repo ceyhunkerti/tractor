@@ -4,6 +4,7 @@ from app.util import required
 
 class BaseStore:
     categories = ["generic"]
+    settings = dict()
 
     questions = [
         {
@@ -20,3 +21,6 @@ class BaseStore:
 
     def __init__(self, config):
         self.config = config
+
+    def scan(self, settings=None):
+        pass

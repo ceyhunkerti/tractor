@@ -1,5 +1,3 @@
-set -a
-. ./env
-set +a
-
+#!/bin/sh
+source .env
 python manage.py "$@"
