@@ -25,3 +25,7 @@ class BaseEngine:
     @classmethod
     def ask(cls):
         prompt(cls.questions)
+
+    @classmethod
+    def ask_express(cls):
+        pass

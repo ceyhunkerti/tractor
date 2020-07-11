@@ -5,6 +5,7 @@ import sys
 import questionary as q
 from questionary import Choice
 from yaspin import yaspin
+from cx_Oracle import DatabaseError
 
 from app import repo, logging
 from app.engine import registery
@@ -162,37 +163,45 @@ class OracleDbLink(BaseEngine):
         store_class = store_registery.get_item_by_key(connection["store"])
         oracle = store_class(connection["props"])
         query = f"""
-            select {",".join(self.config['columns'])}
+            select /*+ ${self.config['source_hint']} */
+                {",".join(self.config['columns'])}
             from {self.config['source_table']}@{self.config['link']}
         """
-        logger.debug(query)
 
         create_table = self.config["create_table"]
 
         if create_table == "if_not_exists" or create_table:
             query = f"""
                 create table {self.config['target_table']}
+                ${self.config['target_hint']}
                 as
                 {query}
             """
         else:
             query = f"""
-                insert into {self.config['target_table']}
+                insert /*+ ${self.config['target_hint']} */
+                    into {self.config['target_table']}
                 {query}
             """
 
         with oracle.open_connection() as conn:
             if create_table == "if_not_exists" or create_table:
+                logger.debug("Dropping target table...")
                 drop_query = f"drop table {self.config['target_table']}"
                 logger.debug(drop_query)
                 cursor = conn.cursor()
-                cursor.execute(drop_query)
+                try:
+                    cursor.execute(drop_query)
+                except DatabaseError:
+                    logger.debug("Table does not exists. Continueing...")
             else:
                 truncate_query = f"truncate table {self.config['target_table']}"
-                logger.debug(drop_query)
+                logger.debug("Truncating target table...")
+                logger.debug(truncate_query)
                 cursor = conn.cursor()
                 cursor.execute(truncate_query)
             cursor.close()
+            logger.debug(query)
             cursor = conn.cursor()
             cursor.execute(query)
             conn.commit()
