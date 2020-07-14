@@ -1,43 +1,54 @@
 import logging
 import click
 import questionary as q
-from funcy import omit
+from questionary import Choice, Separator
+from app.plugins import registery
+from app.plugins import PluginTypes
 
-from app import repo
-from app.store import registery as store_registery
-from app.engine import registery as engine_registery
+logger = logging.getLogger("config.add")
 
-
-
-logger = logging.getLogger("config.connection")
 
 @click.group()
 def add():
-    """Delete config commands"""
-
-
-@add.command(name="connection", help="Add new connection")
-def connection():
-    store_name = q.select("Select connection type", choices=store_registery.names).ask()
-
-    store = store_registery.get_item_by_name(store_name)
-    props = store.ask()
-    repo.add_connection(
-        props["name"],
-        store.type(),
-        store.categories,
-        omit(props, ["name"]),
-        settings=store.settings,
-    )
-
+    """Add config commands"""
 
 
 @add.command(name="mapping", help="Add new mapping")
-def mapping():
+@click.argument("name", default=None, required=False)
+def mapping(name):
+    config = dict()
+    if name is None:
+        name = q.text("Enter mapping name:").ask()
+    config["name"] = name
 
-    name = q.text("Enter mapping name:").ask()
-    engine_name = q.select("Select engine", choices=engine_registery.names).ask()
-    engine = engine_registery.get_item_by_name(engine_name)
-    props = engine.ask()
+    print("---- Add Plugins ----")
+    while True:
+        plugin_type = q.select(
+            "Select plugin type",
+            choices=[
+                Choice(title="Input", value=PluginTypes.INPUT),
+                Choice(title="Output", value=PluginTypes.OUTPUT),
+                Choice(title="Solo", value=PluginTypes.SOLO),
+                Separator(),
+                Choice(title="Exit", value=False),
+            ],
+        ).ask()
 
-    repo.add_mapping(name, engine.type(), props)
+        if not plugin_type:
+            break
+
+        if not config.get(plugin_type):
+            config[plugin_type] = []
+
+        plugin = q.select(
+            "Select plugin",
+            choices=[
+                Choice(title=plugin.name(), value=plugin)
+                for plugin in registery.items(plugin_type)
+            ],
+        ).ask()
+
+        options = plugin.ask()
+        config[plugin_type].append({"plugin": plugin.slug(), **options})
+
+    print(config)

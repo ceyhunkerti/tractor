@@ -5,7 +5,6 @@ from slugify import slugify
 from funcy import first, is_list, omit
 from tinydb import TinyDB, Query, where
 from .base import db
-from .connection import *
 from .mapping import *
 
 logger = logging.getLogger("repo")

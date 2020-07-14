@@ -1,8 +1,7 @@
 import os
 import logging
 import sys
-from app.store import import_stores
-from app.engine import import_engines
+from app.plugins import import_plugins
 from .cli import tractor
 from . import settings
 
@@ -15,5 +14,4 @@ def setup_logging():
 
 setup_logging()
 
-import_stores(settings.STORES)
-import_engines(settings.ENGINES)
+import_plugins(settings.PLUGINS)

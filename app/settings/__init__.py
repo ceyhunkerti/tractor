@@ -10,41 +10,24 @@ LOG_FORMAT = os.environ.get(
     LOG_PREFIX + "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s",
 )
 
-default_stores = [
-    "app.store.oracle",
-    "app.store.csv",
-]
-enabled_stores = array_from_string(
-    os.environ.get("TRACTOR_ENABLED_STORES", ",".join(default_stores))
-)
-additional_stores = array_from_string(
-    os.environ.get("TRACTOR_ADDITIONAL_STORES", "")
-)
-disabled_stores = array_from_string(
-    os.environ.get("TRACTOR_DISABLED_STORES", "")
-)
-STORES = remove(
-    set(disabled_stores),
-    distinct(enabled_stores + additional_stores),
-)
 
-
-default_engines = [
-    "app.engine.oracle_dblink",
-    "app.engine.sql",
+default_plugins = [
+    "app.plugins.input",
+    "app.plugins.output",
+    "app.plugins.solo",
 ]
-enabled_engines = array_from_string(
-    os.environ.get("TRACTOR_ENABLED_ENGINES", ",".join(default_engines))
+enabled_plugins = array_from_string(
+    os.environ.get("TRACTOR_ENABLED_PLUGINS", ",".join(default_plugins))
 )
-additional_engines = array_from_string(
-    os.environ.get("TRACTOR_ADDITIONAL_ENGINES", "")
+additional_plugins = array_from_string(
+    os.environ.get("TRACTOR_ADDITIONAL_PLUGINS", "")
 )
-disabled_engines = array_from_string(
-    os.environ.get("TRACTOR_DISABLED_ENGINES", "")
+disabled_plugins = array_from_string(
+    os.environ.get("TRACTOR_DISABLED_PLUGINS", "")
 )
-ENGINES = remove(
-    set(disabled_engines),
-    distinct(enabled_engines + additional_engines),
+PLUGINS = remove(
+    set(disabled_plugins),
+    distinct(enabled_plugins + additional_plugins),
 )
 
 
