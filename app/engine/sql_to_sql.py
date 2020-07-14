@@ -30,8 +30,8 @@ class SqlToSql(BaseEngine):
         target = ChannelToSql(self.config['target'])
 
         channel = Queue()
-        reader = Thread(target = source.run, args =(channel, ))
-        writer = Thread(target = target.run, args =(channel, ))
+        reader = Thread(target=source.run, args=(channel, ))
+        writer = Thread(target=target.run, args=(channel, ))
         reader.start()
         writer.start()
 
