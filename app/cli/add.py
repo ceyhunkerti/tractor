@@ -38,7 +38,7 @@ def mapping(name):
             break
 
         if not config.get(plugin_type):
-            config[plugin_type] = []
+            config[plugin_type.value] = []
 
         plugin = q.select(
             "Select plugin",
@@ -49,6 +49,6 @@ def mapping(name):
         ).ask()
 
         options = plugin.ask()
-        config[plugin_type].append({"plugin": plugin.name(), **options})
+        config[plugin_type.value].append({"plugin": plugin.name(), **options})
 
     print(config)
