@@ -12,7 +12,7 @@ class Registery:
     def register(self, item):
         if item.enabled():
             logger.debug("Registering %s item.", item.slug())
-            if self.registery[item.type().value][item.name()] is not None:
+            if self.registery[item.type().value].get(item.name()) is not None:
                 raise ValueError(
                     f"""Name {item.name()} with plugin type {item.type().value} already registered.
                         Plugins names must be unique per plugin-type

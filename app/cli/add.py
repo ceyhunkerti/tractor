@@ -49,6 +49,6 @@ def mapping(name):
         ).ask()
 
         options = plugin.ask()
-        config[plugin_type].append({"plugin": plugin.slug(), **options})
+        config[plugin_type].append({"plugin": plugin.name(), **options})
 
     print(config)
