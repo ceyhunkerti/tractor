@@ -8,14 +8,14 @@ from app.plugins.input.base import InputPlugin
 from app.plugins import registery
 
 try:
-    import cx_Oracle
-
+    from hdbcli import dbapi
+    dbapi.connect()
     ENABLED = True
 except ImportError:
     ENABLED = False
 
 
-logger = logging.getLogger("plugins.input.oracle")
+logger = logging.getLogger("plugins.input.hana")
 
 
 def extract_metadata(cursor):
@@ -24,11 +24,7 @@ def extract_metadata(cursor):
     return metadata
 
 
-class Oracle(InputPlugin):
-    @classmethod
-    def name(cls):
-        return "Oracle"
-
+class Hana(InputPlugin):
     @classmethod
     def enabled(cls):
         return ENABLED
@@ -44,17 +40,6 @@ class Oracle(InputPlugin):
                 validate=lambda val: val.isdigit() and int(val) in range(1, 65535),
             ).ask()
         )
-        service_or_sid = q.select(
-            "* Service Name or SID",
-            choices=[
-                Choice(title="Service Name", value="service_name"),
-                Choice(title="SID", value="sid"),
-            ],
-        ).ask()
-        config[service_or_sid] = q.text(
-            "* Service name" if service_or_sid == "service_name" else "* SID",
-            validate=required,
-        ).ask()
         config["username"] = q.text("* Username", validate=required).ask()
         config["password"] = q.password("* Password", validate=required).ask()
         config["source_type"] = q.select(
@@ -85,21 +70,16 @@ class Oracle(InputPlugin):
                 "Fetch size", default="1000", validate=lambda val: val.isdigit()
             ).ask()
         )
-        config["hint"] = q.text("Select hint").ask()
 
         return config
 
     def _get_connection(self):
-        dsn = cx_Oracle.makedsn(
-            self.config["host"],
-            self.config["port"],
-            sid=self.config.get("sid"),
-            service_name=self.config.get("service_name"),
+        return dbapi.connect(
+            address=self.config['host'],
+            port=self.config['port'],
+            user=self.config['username'],
+            password=self.config['password']
         )
-        connection = cx_Oracle.connect(
-            user=self.config["username"], password=self.config["password"], dsn=dsn
-        )
-        return connection
 
     @contextmanager
     def open_connection(self):
@@ -154,4 +134,4 @@ class Oracle(InputPlugin):
             raise error
 
 
-registery.register(Oracle)
+registery.register(Hana)

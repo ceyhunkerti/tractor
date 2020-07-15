@@ -3,17 +3,12 @@ import click
 from app import repo
 from .add import add
 from .remove import remove
-
+from .run import run
 
 @click.group()
 def tractor():
     """Tractor"""
 
-
-
-@click.command(name="describe", help="Show configuration contents")
-def describe():
-    repo.describe()
 
 
 # @click.command(help="Scans connections for indexing items")
@@ -27,5 +22,4 @@ def describe():
 tractor.add_command(add)
 tractor.add_command(remove)
 # tractor.add_command(scan)
-tractor.add_command(describe)
-# tractor.add_command(run)
+tractor.add_command(run)

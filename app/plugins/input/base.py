@@ -6,25 +6,25 @@ class InputPlugin(BasePlugin, WiredPlugin):
         return PluginTypes.INPUT
 
     def __init__(self, channel, config=None):
-        WiredPlugin.__init__(channel)
-        BasePlugin.__init__(config)
+        BasePlugin.__init__(self, config)
+        WiredPlugin.__init__(self, channel)
 
     def done(self):
-        self.channel.add(dict(type=self.MessageTypes.STATUS, content=self.Status.DONE))
+        self.channel.put(dict(type=self.MessageTypes.STATUS, content=self.Status.DONE))
 
     def success(self):
-        self.channel.add(
+        self.channel.put(
             dict(type=self.MessageTypes.STATUS, content=self.Status.SUCCESS)
         )
 
     def error(self):
-        self.channel.add(dict(type=self.MessageTypes.STATUS, content=self.Status.ERROR))
+        self.channel.put(dict(type=self.MessageTypes.STATUS, content=self.Status.ERROR))
 
     def send_data(self, content):
-        self.channel.add(dict(type=self.MessageTypes.DATA, content=content))
+        self.channel.put(dict(type=self.MessageTypes.DATA, content=content))
 
     def send_metadata(self, content):
-        self.channel.add(dict(type=self.MessageTypes.DATA, content=content))
+        self.channel.put(dict(type=self.MessageTypes.METADATA, content=content))
 
     def run(self):
         raise NotImplementedError()

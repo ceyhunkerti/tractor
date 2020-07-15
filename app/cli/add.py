@@ -1,9 +1,11 @@
+import sys
 import logging
 import click
 import questionary as q
 from questionary import Choice, Separator
 from app.plugins import registery
 from app.plugins import PluginTypes
+from app import repo
 
 logger = logging.getLogger("config.add")
 
@@ -19,7 +21,10 @@ def mapping(name):
     config = dict()
     if name is None:
         name = q.text("Enter mapping name:").ask()
-    config["name"] = name
+
+    if repo.get_mapping(name):
+        logger.error('Mapping with %s already exists', name)
+        sys.exit(1)
 
     print("---- Add Plugins ----")
     while True:
@@ -51,4 +56,4 @@ def mapping(name):
         options = plugin.ask()
         config[plugin_type.value].append({"plugin": plugin.name(), **options})
 
-    print(config)
+    repo.add_mapping(name, config)

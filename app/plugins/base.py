@@ -50,4 +50,3 @@ class WiredPlugin:
             raise ValueError("Channel must be given")
 
         self.channel = channel
-

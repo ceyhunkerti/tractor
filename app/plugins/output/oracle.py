@@ -3,6 +3,7 @@ import logging
 import questionary as q
 from questionary import Choice
 
+
 from app.settings.helpers import parse_boolean
 from app.util import required
 from app.plugins.output.base import OutputPlugin
@@ -31,32 +32,32 @@ class Oracle(OutputPlugin):
     @classmethod
     def ask(cls):
         config = dict()
-        config["host"] = q.text("Host name or ip address", validate=required).ask()
-        config["port"] = q.text(
-            "Port number",
-            filter=int,
+        config["host"] = q.text("* Host name or ip address", validate=required).ask()
+        config["port"] = int(q.text(
+            "* Port number",
+            default="1521",
             validate=lambda val: val.isdigit() and int(val) in range(1, 65535),
-        ).ask()
+        ).ask())
         service_or_sid = q.select(
-            "Service Name or SID",
+            "* Service Name or SID",
             choices=[
                 Choice(title="Service Name", value="service_name"),
                 Choice(title="SID", value="sid"),
             ],
         ).ask()
         config[service_or_sid] = q.text(
-            "Service name" if service_or_sid == "service_name" else "SID",
+            "* Service name" if service_or_sid == "service_name" else "SID",
             validate=required,
         ).ask()
-        config["username"] = q.text("Username", validate=required).ask()
-        config["password"] = q.password("Password", validate=required).ask()
+        config["username"] = q.text("* Username", validate=required).ask()
+        config["password"] = q.password("* Password", validate=required).ask()
 
-        config["table"] = q.text('Table name (eg. "table" or "schema.table")').ask()
+        config["table"] = q.text('* Table name (eg. "table" or "schema.table")').ask()
         config["columns"] = q.text("Columns (optional, comma seperated)").ask()
 
-        config["batch_size"] = q.text(
-            "Batch size", default=1000, filter=int, validate=lambda val: val.isdigit()
-        ).ask()
+        config["batch_size"] = int(q.text(
+            "Batch size", default="1000", validate=lambda val: val.isdigit()
+        ).ask())
 
         return config
 
@@ -83,7 +84,7 @@ class Oracle(OutputPlugin):
     @property
     def query(self):
         bindings = ",".join(
-            [":" + i for i in range(1, self.config["column_count"] + 1)]
+            [":" + str(i) for i in range(1, self.config["column_count"] + 1)]
         )
         if len(self.config.get("columns", [])) > 0:
             return f"""
@@ -120,37 +121,42 @@ class Oracle(OutputPlugin):
             else:
                 self.config["column_count"] = len(self.config["columns"])
 
+    def set_metadata(self, metadata):
+        self.set_column_count(metadata)
+        self.init_progress_bar(metadata.get('count'))
+
     def run(self):
         with self.open_connection() as conn:
             self._truncate_table(conn)
             cursor = conn.cursor()
             rowcount = 0
-            data = []
+            buffer = []
             while True:
                 message = self.channel.get()
-
                 if message["type"] == self.MessageTypes.METADATA:
-                    self.set_column_count(message["content"])
+                    self.set_metadata(message["content"])
                 elif message["type"] == self.MessageTypes.DATA:
+                    self.progress(len(message["content"]))
                     if len(message["content"]) < self.config.get("batch_size", 1000):
-                        data += message["content"]
+                        buffer += message["content"]
                     else:
                         cursor.executemany(self.query, message["content"])
-                        rowcount += len(data)
-                        data = []
+                        rowcount += len(buffer)
+                        buffer = []
                         conn.commit()
                 elif message["type"] == self.MessageTypes.STATUS:
                     if message["content"] == self.Status.SUCCESS:
-                        if len(data) > 0:
-                            cursor.executemany(self.query, message["content"])
-                            rowcount += len(data)
-                            data = []
+                        if len(buffer) > 0:
+                            cursor.executemany(self.query, buffer)
+                            rowcount += len(buffer)
+                            buffer = []
                             conn.commit()
                     else:
                         logger.error("Received error status from channel")
 
-                    self.channel.task_done()
+                    self.close()
                     break
+
 
 
 registery.register(Oracle)

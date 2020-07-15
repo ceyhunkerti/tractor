@@ -40,7 +40,7 @@ def open_connection(config):
 @yaspin(text="Finding db links...")
 def _dblinks(config):
     with open_connection(config) as conn:
-        query = "select db_link from all_links"
+        query = "select db_link from all_db_links"
         cursor = conn.cursor()
         cursor.execute(query)
         records = cursor.fetchall()
@@ -63,12 +63,12 @@ class OracleDbLink(SoloPlugin):
     def ask(cls):
         config = dict()
 
-        config["host"] = q.text("Host name or ip address", validate=required).ask()
-        config["port"] = q.text(
-            "Port number",
-            filter=int,
+        config["host"] = q.text("* Host name or ip address", validate=required).ask()
+        config["port"] = int(q.text(
+            "* Port number",
+            default="1521",
             validate=lambda val: val.isdigit() and int(val) in range(1, 65535),
-        ).ask()
+        ).ask())
         service_or_sid = q.select(
             "Service Name or SID",
             choices=[
@@ -77,16 +77,20 @@ class OracleDbLink(SoloPlugin):
             ],
         ).ask()
         config[service_or_sid] = q.text(
-            "Service name" if service_or_sid == "service_name" else "SID",
+            "* Service name" if service_or_sid == "service_name" else "* SID",
             validate=required,
         ).ask()
-        config["username"] = q.text("Username", validate=required).ask()
-        config["password"] = q.password("Password", validate=required).ask()
+        config["username"] = q.text("* Username", validate=required).ask()
+        config["password"] = q.password("* Password", validate=required).ask()
 
-        config["link"] = q.select("Select db link", choices=_dblinks(config))
-        config["source"] = q.text("Source table [schema.table or just table]").ask()
+        config["link"] = q.select("* Select db link", choices=_dblinks(config)).ask()
+        config["source"] = q.text("* Source table [schema.table or just table]").ask()
+        config["target"] = q.text("Target table [schema.table or just table]").ask()
+        if not config["target"]:
+            config["target"] = config["source"]
+
         config["source_columns"] = q.text(
-            "Source columns (comma seperated)", validate=required
+            "* Source columns (comma seperated)", default="*", validate=required
         ).ask()
         config["target_columns"] = q.text("Target columns (comma seperated)").ask()
 
@@ -97,7 +101,7 @@ class OracleDbLink(SoloPlugin):
         return f"""
             create table {self.config['target']}
             as
-            select {self.config['columns']}
+            select {self.config['source_columns']}
             from {self.config['source']}@{self.config['link']}
         """
 

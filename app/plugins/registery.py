@@ -26,7 +26,7 @@ class Registery:
                 item.name(),
             )
 
-    def get_item(self, plugin_type: PluginTypes, name) -> BasePlugin:
+    def get_item(self, plugin_type: PluginTypes, name: str) -> BasePlugin:
         return self.registery.get(plugin_type.value).get(name)
 
     def items(self, plugin_type: PluginTypes) -> List[BasePlugin]:
