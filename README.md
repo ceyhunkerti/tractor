@@ -124,5 +124,20 @@ provide any output to other consumers. It is a single step that runs a transfer 
 A good example for this maybe `oracle_dblink`. It does not depend any outside data and runs the
 task defined in `solo`
 
+### Command line usage
+Tractor mapping definitions may also be managed with command line if the plugin supports it.
 
+Adding mappings:
+```sh
+tractor add mapping <mapping name>
+# or
+tractor add mapping
+```
+
+Running mappings:
+```sh
+tractor run <mapping name>
+# or
+tractor run
+```
 
