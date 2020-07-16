@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: tractor
+Version: 0.0.1
+Summary: Cross platform data transfer utility
+Home-page: https://github.com/bluecolor/tractor
+Author: ceyhun kerti
+Author-email: ceyhun.kerti@bluecolor.io
+License: MIT
+Description: # Tractor
+        
+        Cross platfor data transfer utility
+        
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Description-Content-Type: text/markdown

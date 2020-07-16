@@ -1,0 +1,7 @@
+PyYAML
+click
+funcy
+python-slugify
+questionary
+tqdm
+yaspin
