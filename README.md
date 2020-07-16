@@ -116,10 +116,10 @@ mappings:
 ```
 
 
-**input** key contains the list of source definitions for producing data
-**output** key contains the list of source definitions for consuming the data
+- **input** key contains the list of source definitions for producing data
+- **output** key contains the list of source definitions for consuming the data
 produced by the sources that are defined in `input` section
-**solo** is different from input and output and does not depend any input and does not
+- **solo** is different from input and output and does not depend any input and does not
 provide any output to other consumers. It is a single step that runs a transfer definition.
 A good example for this maybe `oracle_dblink`. It does not depend any outside data and runs the
 task defined in `solo`
