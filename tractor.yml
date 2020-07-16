@@ -1,8 +1,8 @@
 mappings:
 - DemoLink:
     solo:
-    - host: 192.168.1.196
-      link: LNK_ODIVM2
+    - host: 192.168.1.123
+      link: LNK_VM2
       password: tractor
       plugin: Oracle DB Link
       port: 1521
@@ -10,14 +10,13 @@ mappings:
       source: tractor.table_1
       source_columns: '*'
       target: tractor.table_1
-      target_columns: ''
       username: tractor
 - DemoCSV:
     input:
     - columns: '*'
       fetch_size: 1000
       hint: ''
-      host: 192.168.1.196
+      host: 192.168.1.123
       password: tractor
       plugin: Oracle
       port: 1521
