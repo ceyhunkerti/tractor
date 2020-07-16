@@ -32,10 +32,20 @@ class Csv(OutputPlugin):
     def run(self):
         with open(self.config["file"], "w") as handle:
             buffer = []
+            delimiter = (
+                self.config["delimiter"]
+                .replace("\\r", "\r")
+                .replace("\\n", "\n")
+                .replace("\\t", "\t")
+            )
+            lineterminator = (
+                self.config["lineterminator"]
+                .replace("\\r", "\r")
+                .replace("\\n", "\n")
+                .replace("\\t", "\t")
+            )
             writer = csv.writer(
-                handle,
-                delimiter="{}".format(self.config["delimiter"]),
-                lineterminator="{}".format(self.config["lineterminator"]),
+                handle, delimiter=delimiter, lineterminator=lineterminator,
             )
             while True:
                 message = self.channel.get()
@@ -43,7 +53,7 @@ class Csv(OutputPlugin):
                     self.set_metadata(message["content"])
                 elif message["type"] == self.MessageTypes.DATA:
                     self.progress(len(message["content"]))
-                    if len(message["content"]) < self.config["batch_size"]:
+                    if len(buffer) < self.config["batch_size"]:
                         buffer += message["content"]
                     else:
                         writer.writerows(buffer)

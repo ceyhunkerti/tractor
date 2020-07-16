@@ -1,3 +1,4 @@
+import os
 import yaml
 from tractor.settings import CONFIG_FILE
 
@@ -5,6 +6,9 @@ from tractor.settings import CONFIG_FILE
 class Repository:
     def __init__(self, filename):
         self.filename = filename
+        if not os.path.exists(filename):
+            open(filename, 'w').close()
+
         self.snapshot = self.read()
 
     def read(self):

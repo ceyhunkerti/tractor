@@ -1,6 +1,7 @@
 PyYAML
 click
 funcy
+pathlib
 python-slugify
 questionary
 tqdm

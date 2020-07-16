@@ -119,7 +119,7 @@ class Oracle(OutputPlugin):
                     self.set_metadata(message["content"])
                 elif message["type"] == self.MessageTypes.DATA:
                     self.progress(len(message["content"]))
-                    if len(message["content"]) < self.config.get("batch_size", 1000):
+                    if len(buffer) < self.config.get("batch_size", 1000):
                         buffer += message["content"]
                     else:
                         cursor.executemany(self.query, message["content"])
