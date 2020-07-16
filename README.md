@@ -141,3 +141,7 @@ tractor run <mapping name>
 tractor run
 ```
 
+### Logging
+Logging is controlled by `TRACTOR_LOG_LEVEL` environment variable.
+[See log levels](https://docs.python.org/3/library/logging.html#logging-levels)
+
