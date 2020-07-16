@@ -1,5 +1,5 @@
 # Tractor
 
-![Tractor]("tractor-1.png")
+![Tractor](tractor.png)
 
 Cross platfor data transfer utility
