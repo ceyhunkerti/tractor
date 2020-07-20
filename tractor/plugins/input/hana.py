@@ -37,23 +37,6 @@ class Oracle(DbInputPlugin):
         """)
 
 
-    def _send_metadata(self, cursor):
-        metadata = {
-            'table': self.config.get('table'),
-            'columns': []
-        }
-        for col in cursor.description:
-            column = {
-                "name": col[0],
-                "type_code" : col[1].name,
-                "display_size" : col[2],
-                "internal_size" : col[3],
-                "null_ok" : col[4],
-            }
-            metadata['columns'].append(column)
-
-        self.send_metadata(metadata)
-
     @contextmanager
     def open_connection(self):
         connection = dbapi.connect(
@@ -68,22 +51,13 @@ class Oracle(DbInputPlugin):
             connection.close()
 
 
-    def _prepare(self, conn, cursor):
-        if self.config.get('count', True):
-            count = self.count(conn)
-            self.send_count(count)
-
-        if self.config.get('metadata', True):
-            self._send_metadata(cursor)
-
-
     def run(self):
         error = None
         try:
             with self.open_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(self.query)
-                self._prepare(conn, cursor)
+                self.publish_metadata(conn, cursor)
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
                     if not rows:

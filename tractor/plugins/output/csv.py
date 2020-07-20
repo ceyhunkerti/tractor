@@ -9,15 +9,8 @@ logger = logging.getLogger("plugins.output.csv")
 
 class Csv(OutputPlugin):
 
-    def _prepare(self):
-        if self.config.get('progress', True):
-            for message in self.count_channel():
-                self.init_progress_bar(message.content)
-                break
-
-
     def run(self):
-        self._prepare()
+        self.prepare()
 
         with open(self.config["file"], "w") as handle:
             delimiter = to_delimiter(self.config.get("delimiter", ","))

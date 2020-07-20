@@ -6,6 +6,13 @@ class OutputPlugin(BasePlugin, WiredPlugin):
     def type(cls):
         return PluginType.OUTPUT
 
+    def prepare(self):
+        if self.config.get('progress', True):
+            for message in self.count_channel():
+                self.init_progress_bar(message.content)
+                break
+
+
     def __init__(self, channel, config=None):
         WiredPlugin.__init__(self, channel)
         BasePlugin.__init__(self, config)

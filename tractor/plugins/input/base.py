@@ -62,3 +62,25 @@ class DbInputPlugin(InputPlugin):
         count = cursor.fetchone()[0]
         cursor.close()
         return count
+
+    def publish_metadata(self, conn, cursor):
+        if self.config.get('count', True):
+            count = self.count(conn)
+            self.send_count(count)
+
+        if self.config.get('metadata', True):
+            metadata = {
+                'table': self.config.get('table'),
+                'columns': []
+            }
+            for col in cursor.description:
+                column = {
+                    "name": col[0],
+                    "type_code" : col[1].name,
+                    "display_size" : col[2],
+                    "internal_size" : col[3],
+                    "null_ok" : col[4],
+                }
+                metadata['columns'].append(column)
+
+            self.send_metadata(metadata)

@@ -4,7 +4,6 @@ import logging
 
 from tractor.plugins.input.base import DbInputPlugin
 from tractor.plugins import registery
-from tractor.settings.helpers import parse_boolean
 
 try:
     import cx_Oracle
@@ -41,24 +40,6 @@ class Oracle(DbInputPlugin):
             * either query or table must be given
         """)
 
-
-    def _send_metadata(self, cursor):
-        metadata = {
-            'table': self.config.get('table'),
-            'columns': []
-        }
-        for col in cursor.description:
-            column = {
-                "name": col[0],
-                "type_code" : col[1].name,
-                "display_size" : col[2],
-                "internal_size" : col[3],
-                "null_ok" : col[4],
-            }
-            metadata['columns'].append(column)
-
-        self.send_metadata(metadata)
-
     @contextmanager
     def open_connection(self):
         dsn = cx_Oracle.makedsn(
@@ -81,16 +62,9 @@ class Oracle(DbInputPlugin):
         error = None
         try:
             with self.open_connection() as conn:
-
-                if parse_boolean(self.config.get('count', True)):
-                    count = self.count(conn)
-                    self.send_count(count)
-
                 cursor = conn.cursor()
                 cursor.execute(self.query)
-
-                if parse_boolean(self.config.get('metadata', True)):
-                    self._send_metadata(cursor)
+                self.publish_metadata(conn, cursor)
 
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
