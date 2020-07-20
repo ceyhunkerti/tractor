@@ -1,6 +1,6 @@
 import logging
 from typing import List
-from .base import PluginTypes, BasePlugin
+from .base import PluginType, BasePlugin
 
 logger = logging.getLogger("plugins.registery")
 
@@ -26,8 +26,8 @@ class Registery:
                 item.name(),
             )
 
-    def get_item(self, plugin_type: PluginTypes, name: str) -> BasePlugin:
+    def get_item(self, plugin_type: PluginType, name: str) -> BasePlugin:
         return self.registery.get(plugin_type.value).get(name)
 
-    def items(self, plugin_type: PluginTypes) -> List[BasePlugin]:
+    def items(self, plugin_type: PluginType) -> List[BasePlugin]:
         return self.registery[plugin_type.value].values()

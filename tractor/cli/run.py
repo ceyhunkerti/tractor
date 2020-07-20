@@ -3,41 +3,29 @@ import logging
 from queue import Queue
 from threading import Thread
 import click
-import questionary as q
 from tractor import repo
-from tractor.plugins import registery, PluginTypes
+from tractor.plugins import registery, PluginType
 
 logger = logging.getLogger("cli.run")
 
 
 @click.command("run")
-@click.argument("name", default=None, required=False)
+@click.argument("name", required=True)
 def run(name):
     logger.info('Running...')
-    if not name:
-        name = q.autocomplete(
-            "Enter mapping name", choices=repo.get_mapping_names()
-        ).ask()
 
     mapping = repo.get_mapping(name)
 
-    runners = dict()
+    incls = registery.get_item(PluginType.INPUT, mapping['input']['plugin'])
+    outcls = registery.get_item(PluginType.OUTPUT, mapping['output']['plugin'])
+
     channel = Queue()
-    for _type in ["input", "output", "solo"]:
-        runners[_type] = [
-            registery.get_item(PluginTypes(_type), config['plugin'])(config)
-            if _type == "solo"
-            else registery.get_item(PluginTypes(_type), config['plugin'])(
-                channel, config
-            )
-            for config in mapping.get(_type, [])
-        ]
+    _in = incls(channel, mapping['input'])
+    _out = outcls(channel, mapping['output'])
 
     threads = []
-    for _type in ["solo", "output", "input"]:
-        for runner in runners[_type]:
-            threads.append(Thread(target=runner.run))
-
+    threads.append(Thread(target=_in.run))
+    threads.append(Thread(target=_out.run))
 
     for thread in threads:
         thread.start()

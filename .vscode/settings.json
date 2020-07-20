@@ -1,8 +1,10 @@
 {
   "files.exclude": {
+    "**/build": true,
     "**/venv": true
   },
   "search.exclude": {
+    "**/build": true,
     "**/env": true
   },
   "python.linting.flake8Enabled": false,

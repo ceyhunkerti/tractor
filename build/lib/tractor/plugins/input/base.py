@@ -1,9 +1,9 @@
-from tractor.plugins import BasePlugin, WiredPlugin, PluginTypes
+from tractor.plugins import BasePlugin, WiredPlugin, PluginType
 
 class InputPlugin(BasePlugin, WiredPlugin):
     @classmethod
     def type(cls):
-        return PluginTypes.INPUT
+        return PluginType.INPUT
 
     def __init__(self, channel, config=None):
         BasePlugin.__init__(self, config)

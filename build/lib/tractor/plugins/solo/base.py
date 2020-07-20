@@ -1,10 +1,10 @@
-from tractor.plugins import BasePlugin, PluginTypes
+from tractor.plugins import BasePlugin, PluginType
 
 class SoloPlugin(BasePlugin):
 
     @classmethod
     def type(cls):
-        return PluginTypes.SOLO
+        return PluginType.SOLO
 
     def run(self):
         raise NotImplementedError()

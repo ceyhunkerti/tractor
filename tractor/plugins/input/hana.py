@@ -1,128 +1,95 @@
 from contextlib import contextmanager
 import logging
-import questionary as q
-from questionary import Choice
 
-from tractor.util import required
-from tractor.plugins.input.base import InputPlugin
+from tractor.plugins.input.base import DbInputPlugin
 from tractor.plugins import registery
 
 try:
     from hdbcli import dbapi
-    dbapi.connect()
+
     ENABLED = True
 except ImportError:
     ENABLED = False
 
 
-logger = logging.getLogger("plugins.input.hana")
+logger = logging.getLogger("plugins.input.oracle")
 
 
-def extract_metadata(cursor):
-    metadata = {}
-    metadata["columns"] = [{"name": c[0]} for c in cursor.description]
-    return metadata
-
-
-class Hana(InputPlugin):
+class Oracle(DbInputPlugin):
     @classmethod
     def enabled(cls):
         return ENABLED
 
-    @classmethod
-    def ask(cls):
-        config = dict()
-        config["host"] = q.text("* Host name or ip address", validate=required).ask()
-        config["port"] = int(
-            q.text(
-                "Port number",
-                default="1521",
-                validate=lambda val: val.isdigit() and int(val) in range(1, 65535),
-            ).ask()
-        )
-        config["username"] = q.text("* Username", validate=required).ask()
-        config["password"] = q.password("* Password", validate=required).ask()
-        config["source_type"] = q.select(
-            "* Source type",
-            choices=[
-                Choice(title="Table", value="table"),
-                Choice(title="Query", value="query"),
-                Choice(title="Query file", value="query_file"),
-            ],
-        ).ask()
+    def help(self):
+        print("""
+            host:[required]     = Path to input file
+            port:[1521]         = Field delimiter
+            username            = Connection username
+            password            = Connection password or environment variable $PASSWORD
+            table:[*]           = Table name schema.table_name or table_name
+            columns             = [{name: column_name, type: column_type}, ...]
+            query:[*]           = Query file or query string
+            batch_size          = Batch insert size
+            metadata:[True]     = Send metadata to ouput plugin
+            count:[True]        = Send count to ouput plugin
 
-        if config["source_type"] == "table":
-            config["table"] = q.text(
-                '* Table name (eg. "table" or "schema.table")', validate=required
-            ).ask()
-            config["columns"] = q.text(
-                "* Columns seperated with comma", default="*", validate=required
-            ).ask()
-        elif config["source_type"] == "query":
-            config["query"] = q.text("* Select query", validate=required).ask()
-        else:
-            config["query_file"] = q.text(
-                "* Query file (eg. /full/path/to/query_file.sql)", validate=required
-            ).ask()
+            * either query or table must be given
+        """)
 
-        config["fetch_size"] = int(
-            q.text(
-                "Fetch size", default="1000", validate=lambda val: val.isdigit()
-            ).ask()
-        )
 
-        return config
+    def _send_metadata(self, cursor):
+        metadata = {
+            'table': self.config.get('table'),
+            'columns': []
+        }
+        for col in cursor.description:
+            column = {
+                "name": col[0],
+                "type_code" : col[1].name,
+                "display_size" : col[2],
+                "internal_size" : col[3],
+                "null_ok" : col[4],
+            }
+            metadata['columns'].append(column)
 
-    def _get_connection(self):
-        return dbapi.connect(
-            address=self.config['host'],
-            port=self.config['port'],
-            user=self.config['username'],
-            password=self.config['password']
-        )
+        self.send_metadata(metadata)
 
     @contextmanager
     def open_connection(self):
-        connection = self._get_connection()
+        connection = dbapi.connect(
+            address=self.config['host'],
+            port=self.config.get('port', 30015),
+            user=self.config['username'],
+            password=self.config['password']
+        )
         try:
             yield connection
         finally:
             connection.close()
 
-    @property
-    def query(self):
-        if self.config["source_type"] == "file":
-            with open(self.config["query_file"], "r") as file:
-                result = file.read()
-        elif self.config["source_type"] == "query":
-            result = self.config["query"]
-        elif self.config["source_type"] == "table":
-            result = f"""
-                select {self.config['columns']} from {self.config['table']}
-            """
 
-        return result
+    def _prepare(self, conn, cursor):
+        if self.config.get('count', True):
+            count = self.count(conn)
+            self.send_count(count)
 
-    def count(self, conn):
-        cursor = conn.cursor()
-        cursor.execute(f"""select count(1) from ({self.query})""")
-        row_count = cursor.fetchone()[0]
-        cursor.close()
-        return row_count
+        if self.config.get('metadata', True):
+            self._send_metadata(cursor)
+
 
     def run(self):
         error = None
         try:
             with self.open_connection() as conn:
-                count = self.count(conn)
                 cursor = conn.cursor()
                 cursor.execute(self.query)
-                self.send_metadata({"count": count, **extract_metadata(cursor)})
+                self._prepare(conn, cursor)
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
                     if not rows:
                         break
                     self.send_data(rows)
+
             self.success()
         except Exception as err:  # pylint: disable=broad-except
             logger.error("Read error", exc_info=err)
@@ -134,4 +101,5 @@ class Hana(InputPlugin):
             raise error
 
 
-registery.register(Hana)
+registery.register(Oracle)
+

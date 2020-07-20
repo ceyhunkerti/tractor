@@ -1,32 +1,37 @@
 mappings:
-- DemoLink:
-    solo:
-    - host: 192.168.1.123
-      link: LNK_VM2
-      password: tractor
-      plugin: Oracle DB Link
-      port: 1521
-      service_name: orcl
-      source: tractor.table_1
-      source_columns: '*'
-      target: tractor.table_1
-      username: tractor
-- DemoCSV:
+- Demo:
     input:
-    - columns: '*'
-      fetch_size: 1000
-      hint: ''
-      host: 192.168.1.123
-      password: tractor
-      plugin: Oracle
-      port: 1521
-      service_name: orcl
-      source_type: table
-      table: table_3
-      username: tractor
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        service_name: orcl
+        columns: "*"
+        table: table_3
     output:
-    - batch_size: 1000
-      delimiter: ','
-      file: /home/ceyhun/projects/lab/tractor/play/table_1.csv
-      lineterminator: \r\n
-      plugin: Csv
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        table: table_5
+        columns:
+            - name: A
+              type: number
+            - name: B
+              type: date
+            - name: C
+              type: varchar2(100)
+        service_name: orcl
+        truncate: True
+- DemoCsv:
+    input:
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        service_name: orcl
+        columns: "*"
+        table: table_3
+    output:
+        plugin: Csv
+        file: /home/ceyhun/projects/lab/tractor/play/table_1.csv

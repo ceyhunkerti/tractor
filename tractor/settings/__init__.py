@@ -14,7 +14,6 @@ LOG_FORMAT = os.environ.get(
 default_plugins = [
     "tractor.plugins.input",
     "tractor.plugins.output",
-    "tractor.plugins.solo",
 ]
 enabled_plugins = array_from_string(
     os.environ.get("TRACTOR_ENABLED_PLUGINS", ",".join(default_plugins))
@@ -31,3 +30,9 @@ PLUGINS = remove(
 )
 
 CONFIG_FILE = os.environ.get("TRACTOR_CONFIG_FILE", "./tractor.yml")
+
+
+META_CHANNEL_TIMEOUT = int(os.environ.get('TRACTOR_META_CHANNEL_TIMEOUT', 10))
+DATA_CHANNEL_TIMEOUT = int(os.environ.get('TRACTOR_DATA_CHANNEL_TIMEOUT', 20))
+CHANNEL_TIMEOUT = int(os.environ.get('TRACTOR_CHANNEL_TIMEOUT', 20))
+COUNT_CHANNEL_TIMEOUT = int(os.environ.get('TRACTOR_COUNT_CHANNEL_TIMEOUT', 60))

@@ -1,10 +1,11 @@
+
 from enum import Enum
 from types import SimpleNamespace
 from questionary import prompt
 from slugify import slugify
 
 
-class PluginTypes(Enum):
+class PluginType(Enum):
     INPUT = "input"
     OUTPUT = "output"
     SOLO = "solo"
@@ -50,3 +51,18 @@ class WiredPlugin:
             raise ValueError("Channel must be given")
 
         self.channel = channel
+
+
+
+class MessageType(Enum):
+    DATA = "data"
+    METADATA = "metadata"
+    STATUS = "status"
+    DONE = "done"
+    ERROR = "error"
+    SUCCESS = "success"
+
+
+@dataclass
+class Message:
+    message_type: MessageType

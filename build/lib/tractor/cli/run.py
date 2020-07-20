@@ -1,14 +1,23 @@
-# import sys
+import os
 import logging
 from queue import Queue
 from threading import Thread
 import click
 import questionary as q
 from tractor import repo
-from tractor.plugins import registery, PluginTypes
+from tractor.plugins import registery, PluginType
 
 logger = logging.getLogger("cli.run")
 
+
+def get_mapping(mapping):
+    if not os.path.isfile(mapping):
+        return repo.get_mapping(mapping)
+
+    with open(mapping) as handler:
+        content = handler.read()
+
+    return content
 
 @click.command("run")
 @click.argument("name", default=None, required=False)
@@ -19,15 +28,15 @@ def run(name):
             "Enter mapping name", choices=repo.get_mapping_names()
         ).ask()
 
-    mapping = repo.get_mapping(name)
+    mapping = get_mapping(name)
 
     runners = dict()
     channel = Queue()
     for _type in ["input", "output", "solo"]:
         runners[_type] = [
-            registery.get_item(PluginTypes(_type), config['plugin'])(config)
+            registery.get_item(PluginType(_type), config['plugin'])(config)
             if _type == "solo"
-            else registery.get_item(PluginTypes(_type), config['plugin'])(
+            else registery.get_item(PluginType(_type), config['plugin'])(
                 channel, config
             )
             for config in mapping.get(_type, [])

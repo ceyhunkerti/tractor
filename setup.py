@@ -28,9 +28,7 @@ setup(
     install_requires=[
         "click",
         "funcy",
-        "python-slugify",
         "PyYAML",
-        "questionary",
         "tqdm",
         "yaspin",
         "pathlib"

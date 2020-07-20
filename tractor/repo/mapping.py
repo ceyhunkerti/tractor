@@ -3,7 +3,7 @@ from .base import repo
 
 logger = logging.getLogger("repository.mapping")
 
-__all__ = ["add_mapping", "get_mapping", "get_mapping_names"]
+__all__ = ["add_mapping", "get_mapping", "get_mapping_names", "delete_mapping"]
 
 
 def add_mapping(name, options):
@@ -31,3 +31,11 @@ def get_mapping_names():
     config = repo.read()
     mappings = config.get("mappings")
     return sum([list(m.keys()) for m in mappings], [])
+
+
+def delete_mapping(name):
+    config = repo.read()
+    config["mappings"] = [
+        m for m in config["mappings"] if list(m.keys().lower())[0] == name.lower()
+    ]
+    repo.write(config)

@@ -1,5 +1,5 @@
 from .registery import Registery
-from .base import PluginTypes, BasePlugin, WiredPlugin
+from .base import PluginType, BasePlugin, WiredPlugin
 
 
 registery = Registery()

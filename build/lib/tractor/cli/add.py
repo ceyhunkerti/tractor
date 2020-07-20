@@ -3,7 +3,7 @@ import logging
 import click
 import questionary as q
 from questionary import Choice, Separator
-from tractor.plugins import PluginTypes, registery
+from tractor.plugins import PluginType, registery
 from tractor import repo
 
 logger = logging.getLogger("config.add")
@@ -30,9 +30,9 @@ def mapping(name):
         plugin_type = q.select(
             "Select plugin type",
             choices=[
-                Choice(title="Input", value=PluginTypes.INPUT),
-                Choice(title="Output", value=PluginTypes.OUTPUT),
-                Choice(title="Solo", value=PluginTypes.SOLO),
+                Choice(title="Input", value=PluginType.INPUT),
+                Choice(title="Output", value=PluginType.OUTPUT),
+                Choice(title="Solo", value=PluginType.SOLO),
                 Separator(),
                 Choice(title="Exit", value=False),
             ],

@@ -1,10 +1,10 @@
 from tqdm import tqdm
-from tractor.plugins import BasePlugin, WiredPlugin, PluginTypes
+from tractor.plugins import BasePlugin, WiredPlugin, PluginType
 
 class OutputPlugin(BasePlugin, WiredPlugin):
     @classmethod
     def type(cls):
-        return PluginTypes.OUTPUT
+        return PluginType.OUTPUT
 
     def __init__(self, channel, config=None):
         WiredPlugin.__init__(self, channel)

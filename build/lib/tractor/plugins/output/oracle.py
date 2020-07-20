@@ -115,9 +115,7 @@ class Oracle(OutputPlugin):
             buffer = []
             while True:
                 message = self.channel.get()
-                if message["type"] == self.MessageTypes.METADATA:
-                    self.set_metadata(message["content"])
-                elif message["type"] == self.MessageTypes.DATA:
+                if message["type"] == self.MessageTypes.DATA:
                     self.progress(len(message["content"]))
                     if len(buffer) < self.config.get("batch_size", 1000):
                         buffer += message["content"]
