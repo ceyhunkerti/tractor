@@ -1,6 +1,7 @@
-
 def parse_boolean(val):
     """Takes a string and returns the equivalent as a boolean value."""
+    if isinstance(val, bool):
+        return val
     val = val.strip().lower()
     if val in ("yes", "true", "on", "1"):
         return True
@@ -9,6 +10,7 @@ def parse_boolean(val):
         return False
 
     raise ValueError("Invalid boolean value %r" % val)
+
 
 def array_from_string(val):
     array = val.split(",")

@@ -1,8 +1,6 @@
-PyYAML
 click
 funcy
-pathlib
-python-slugify
-questionary
+PyYAML
 tqdm
 yaspin
+pathlib
