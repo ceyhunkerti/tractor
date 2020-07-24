@@ -55,9 +55,9 @@ class Oracle(DbInputPlugin):
         error = None
         try:
             with self.open_connection() as conn:
+                self._send_count(conn)
                 cursor = conn.cursor()
                 cursor.execute(self.query)
-                self.publish_metadata(conn, cursor)
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
                     if not rows:
