@@ -20,6 +20,7 @@ tractor/plugins/input/__init__.py
 tractor/plugins/input/base.py
 tractor/plugins/input/csv.py
 tractor/plugins/input/hana.py
+tractor/plugins/input/mssql.py
 tractor/plugins/input/oracle.py
 tractor/plugins/output/__init__.py
 tractor/plugins/output/base.py

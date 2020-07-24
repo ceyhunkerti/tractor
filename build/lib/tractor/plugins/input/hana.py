@@ -22,8 +22,8 @@ class Oracle(DbInputPlugin):
 
     def help(self):
         print("""
-            host:[required]     = Path to input file
-            port:[1521]         = Field delimiter
+            host:[required]     = Hostname or ip address
+            port:[1521]         = Port number
             username            = Connection username
             password            = Connection password or environment variable $PASSWORD
             table:[*]           = Table name schema.table_name or table_name

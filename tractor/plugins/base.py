@@ -18,12 +18,10 @@ logger = logging.getLogger("plugins")
 class PluginType(Enum):
     INPUT = "input"
     OUTPUT = "output"
-    SOLO = "solo"
     FILTER = "filter"
 
 
 class BasePlugin(ABC):
-    questions = []
 
     @classmethod
     def name(cls):

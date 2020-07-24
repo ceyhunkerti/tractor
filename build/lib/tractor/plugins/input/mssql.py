@@ -1,4 +1,3 @@
-import os
 from contextlib import contextmanager
 import logging
 
@@ -6,7 +5,7 @@ from tractor.plugins.input.base import DbInputPlugin
 from tractor.plugins import registery
 
 try:
-    import cx_Oracle
+    import _mssql
 
     ENABLED = True
 except ImportError:
@@ -16,19 +15,18 @@ except ImportError:
 logger = logging.getLogger("plugins.input.oracle")
 
 
-class Oracle(DbInputPlugin):
+class MsSql(DbInputPlugin):
     @classmethod
     def enabled(cls):
         return ENABLED
 
     def help(self):
         print("""
-            host:[required]     = Hostname or ip address
-            port:[1521]         = Port number
+            host:[required]     = host name or ip address
+            port:[1433]         = Port number
             username            = Connection username
             password            = Connection password or environment variable $PASSWORD
-            sid:[*]             = Record delimiter
-            serivce_name:[*]    = Count records and send to output plugin
+            database            = Database name
             table:[*]           = Table name schema.table_name or table_name
             columns             = [{name: column_name, type: column_type}, ...]
             query:[*]           = Query file or query string
@@ -36,21 +34,25 @@ class Oracle(DbInputPlugin):
             metadata:[True]     = Send metadata to ouput plugin
             count:[True]        = Send count to ouput plugin
 
-            * either service_name or sid must be given
             * either query or table must be given
         """)
 
+
+    def count(self, conn):
+        cursor = conn.cursor()
+        cursor.execute(f"""select count_big(1) from ({self.query})""")
+        count = cursor.fetchone()[0]
+        cursor.close()
+        return count
+
     @contextmanager
     def open_connection(self):
-        dsn = cx_Oracle.makedsn(
-            self.config["host"],
-            self.config.get("port", 1521),
-            sid=self.config.get("sid"),
-            service_name=self.config.get("service_name"),
-        )
-        password = os.environ.get(self.config["password"][1:], self.config["password"])
-        connection = cx_Oracle.connect(
-            user=self.config["username"], password=password, dsn=dsn
+        connection = _mssql.connect(
+            server=self.config['host'],
+            user=self.config['username'],
+            password=self.config['password'],
+            database=self.config['database'],
+            port=self.config.get('port', 1433)
         )
         try:
             yield connection
@@ -65,7 +67,6 @@ class Oracle(DbInputPlugin):
                 cursor = conn.cursor()
                 cursor.execute(self.query)
                 self.publish_metadata(conn, cursor)
-
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
                     if not rows:
@@ -83,4 +84,4 @@ class Oracle(DbInputPlugin):
             raise error
 
 
-registery.register(Oracle)
+registery.register(MsSql)
