@@ -1,9 +1,9 @@
-# ![Tractor](https://github.com/bluecolor/tractor/blob/master/tractor.png) Tractor
+# ![Tractor](tractor.png) Tractor
 
 Plugin based cross platform data transfer utility.
 
 Tractor is extendable data transfer utility between various source and target systems.
-It utilizes input/output/and solo plugins to move data between providers and consumers.
+It utilizes input and output  plugins to move data between providers and consumers.
 
 ## Installation
 
@@ -60,36 +60,21 @@ For example in linux you can change the config file location with;
 export TRACTOR_CONFIG_FILE=/path/to/config.yml
 ```
 
-### Configuration file format
-```yml
-# the skeleton of config file is like this;
-# mappings: { [
-    # { mapping_name: { mapping_body } },
-    # { mapping_name: { mapping_body } },
-    # ...
-# ] }
-
-# "mappings" : root of the mapping definitions
-# "mapping_name" : Unique name of mapping
-# transfer definition is called "mapping"
-# list of mapping definitions are kept under "mappings" key
-mappings:
-# each mapping have the mapping name as the key and an further config details as value.
-- Mapiing Name:
-    input:
-      ...props
-    output:
-      ...props
-```
-
 
 # Usage
 Running mappings:
 ```sh
 tractor run <mapping name>
+# or
+tractor run <mapping file>
 ```
 
 ### Logging
 Logging is controlled by `TRACTOR_LOG_LEVEL` environment variable.
 [See log levels](https://docs.python.org/3/library/logging.html#logging-levels)
 
+### Plugins
+
+- **Oracle** `pip install cx_Oracle`
+- **MsSql** `pip install pymssql`
+- **Hana** `pip install hdbcli`
