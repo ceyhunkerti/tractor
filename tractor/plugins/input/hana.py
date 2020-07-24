@@ -12,10 +12,10 @@ except ImportError:
     ENABLED = False
 
 
-logger = logging.getLogger("plugins.input.oracle")
+logger = logging.getLogger("plugins.input.hana")
 
 
-class Oracle(DbInputPlugin):
+class Hana(DbInputPlugin):
     @classmethod
     def enabled(cls):
         return ENABLED
@@ -75,5 +75,4 @@ class Oracle(DbInputPlugin):
             raise error
 
 
-registery.register(Oracle)
-
+registery.register(Hana)
