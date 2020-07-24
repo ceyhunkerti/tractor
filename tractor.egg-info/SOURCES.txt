@@ -10,7 +10,6 @@ tractor.egg-info/entry_points.txt
 tractor.egg-info/requires.txt
 tractor.egg-info/top_level.txt
 tractor/cli/__init__.py
-tractor/cli/add.py
 tractor/cli/remove.py
 tractor/cli/run.py
 tractor/plugins/__init__.py
