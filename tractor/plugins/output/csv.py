@@ -22,7 +22,7 @@ class Csv(OutputPlugin):
 
             buffer = []
             for message in self.data_channel():
-                if len(buffer) < self.config.get("batch_size", 1000):
+                if len(buffer) <= self.config.get("batch_size", 1000):
                     buffer += message.content
                 else:
                     writer.writerows(buffer)

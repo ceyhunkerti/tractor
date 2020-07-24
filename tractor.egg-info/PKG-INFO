@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: tractor
-Version: 0.0.7
+Version: 0.0.19
 Summary: Cross platform data transfer utility
 Home-page: https://github.com/bluecolor/tractor
 Author: ceyhun kerti
 Author-email: ceyhun.kerti@bluecolor.io
 License: MIT
-Description: # ![Tractor](tractor.png) Tractor
+Description: # ![Tractor](https://github.com/bluecolor/tractor/blob/master/tractor.png) Tractor
         
         Plugin based cross platform data transfer utility.
         

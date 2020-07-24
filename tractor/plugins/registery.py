@@ -7,7 +7,7 @@ logger = logging.getLogger("plugins.registery")
 
 class Registery:
     def __init__(self):
-        self.registery = dict(input={}, output={}, filter={}, solo={})
+        self.registery = dict(input={}, output={}, filter={})
 
     def register(self, item):
         if item.enabled():

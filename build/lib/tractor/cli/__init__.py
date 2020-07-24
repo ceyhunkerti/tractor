@@ -1,7 +1,6 @@
 import logging
 import click
 from tractor import repo
-from .add import add
 from .remove import remove
 from .run import run
 
@@ -19,7 +18,6 @@ def tractor():
 #     engine = engine_class(mapping['props'])
 #     engine.run()
 
-tractor.add_command(add)
 tractor.add_command(remove)
 # tractor.add_command(scan)
 tractor.add_command(run)

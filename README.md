@@ -1,4 +1,4 @@
-# ![Tractor](tractor.png) Tractor
+# ![Tractor](https://github.com/bluecolor/tractor/blob/master/tractor.png) Tractor
 
 Plugin based cross platform data transfer utility.
 

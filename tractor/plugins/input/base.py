@@ -42,9 +42,9 @@ class DbInputPlugin(InputPlugin):
         table = self.config.get('table', None)
         if table:
             return f"""
-                select {self.config['columns']} from {table}
+                select {self.config.get('columns', '*')} from {table}
             """
-        exit(1)
+
         query = self.config.get('query', None)
 
         if query:
@@ -63,24 +63,6 @@ class DbInputPlugin(InputPlugin):
         cursor.close()
         return count
 
-    def publish_metadata(self, conn, cursor):
-        if self.config.get('count', True):
-            count = self.count(conn)
-            self.send_count(count)
-
-        if self.config.get('metadata', True):
-            metadata = {
-                'table': self.config.get('table'),
-                'columns': []
-            }
-            for col in cursor.description:
-                column = {
-                    "name": col[0],
-                    "type_code" : col[1].name,
-                    "display_size" : col[2],
-                    "internal_size" : col[3],
-                    "null_ok" : col[4],
-                }
-                metadata['columns'].append(column)
-
-            self.send_metadata(metadata)
+    def _send_count(self, conn):
+        count = self.count(conn)
+        return super().send_count(count)

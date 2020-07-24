@@ -127,7 +127,7 @@ class Oracle(OutputPlugin):
             query = self.build_query(conn)
             cursor = conn.cursor()
             for message in self.data_channel():
-                if len(buffer) < self.config.get("batch_size", 1000):
+                if len(buffer) <= self.config.get("batch_size", 1000):
                     buffer += message.content
                 else:
                     cursor.executemany(query, buffer)

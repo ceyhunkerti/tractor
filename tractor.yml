@@ -35,3 +35,18 @@ mappings:
     output:
         plugin: Csv
         file: /home/ceyhun/projects/lab/tractor/play/table_1.csv
+
+- tedas_memnuniyet_verileri:
+    input:
+        plugin: MsSql
+        host: 192.168.0.206
+        username: edvars
+        password: "@!we5x-gse"
+        table: tedas_memnuniyet_verileri
+    output:
+        plugin: Oracle
+        host: 192.168.10.61
+        service_name: admdwh
+        username: primeit
+        password: pit2014
+        table: mscrm.tedas_memnuniyet_verileri

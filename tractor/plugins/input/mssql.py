@@ -5,7 +5,7 @@ from tractor.plugins.input.base import DbInputPlugin
 from tractor.plugins import registery
 
 try:
-    import _mssql
+    import pymssql
 
     ENABLED = True
 except ImportError:
@@ -40,14 +40,14 @@ class MsSql(DbInputPlugin):
 
     def count(self, conn):
         cursor = conn.cursor()
-        cursor.execute(f"""select count_big(1) from ({self.query})""")
+        cursor.execute(f"""select count_big(1) from ({self.query}) q""")
         count = cursor.fetchone()[0]
         cursor.close()
         return count
 
     @contextmanager
     def open_connection(self):
-        connection = _mssql.connect(
+        connection = pymssql.connect(
             server=self.config['host'],
             user=self.config['username'],
             password=self.config['password'],
@@ -64,9 +64,9 @@ class MsSql(DbInputPlugin):
         error = None
         try:
             with self.open_connection() as conn:
+                self._send_count(conn)
                 cursor = conn.cursor()
                 cursor.execute(self.query)
-                self.publish_metadata(conn, cursor)
                 while True:
                     rows = cursor.fetchmany(self.config.get("fetch_size", 1000))
                     if not rows:
