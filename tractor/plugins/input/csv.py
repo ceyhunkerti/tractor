@@ -9,14 +9,13 @@ logger = logging.getLogger("plugins.input.csv")
 
 
 class Csv(InputPlugin):
-    def help(self):
-        print("""
-            file:[required]          = Path to input file
-            delimiter:[,]            = Field delimiter
-            lineterminator:[\\r\\n]  = Record delimiter
-            count:[True]             = Count records and send to output plugin
-            header:[False]           = If first row is header
-        """)
+    """
+        file:[required]          = Path to input file
+        delimiter:[,]            = Field delimiter
+        lineterminator:[\\r\\n]  = Record delimiter
+        count:[True]             = Count records and send to output plugin
+        header:[False]           = If first row is header
+    """
 
     def count(self):
         delimiter = to_delimiter(self.config["delimiter"])
@@ -28,8 +27,8 @@ class Csv(InputPlugin):
             )
             count = sum(1 for _ in reader)
 
-        if self.config['header']:
-            return count -1
+        if self.config["header"]:
+            return count - 1
 
         return count
 
@@ -44,7 +43,7 @@ class Csv(InputPlugin):
             reader = csv.reader(
                 handle, delimiter=delimiter, lineterminator=lineterminator,
             )
-            if self.config['header']:
+            if self.config["header"]:
                 next(reader)
 
             buffer = []

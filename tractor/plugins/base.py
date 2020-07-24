@@ -43,14 +43,6 @@ class BasePlugin(ABC):
         self.config = config
         self.metadata = None
 
-    def build_metadata(self):
-        """Build metadata from config"""
-        raise NotImplementedError()
-
-    def quess_metadata(self, data):
-        """Guess metadata from data"""
-        raise NotImplementedError()
-
     @abstractmethod
     def run(self):
         raise NotImplementedError()

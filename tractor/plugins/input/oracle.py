@@ -17,28 +17,27 @@ logger = logging.getLogger("plugins.input.oracle")
 
 
 class Oracle(DbInputPlugin):
+    """
+        host:[required]     = Hostname or ip address
+        port:[1521]         = Port number
+        username            = Connection username
+        password            = Connection password or environment variable $PASSWORD
+        sid:[*]             = Record delimiter
+        serivce_name:[*]    = Count records and send to output plugin
+        table:[*]           = Table name schema.table_name or table_name
+        columns             = [{name: column_name, type: column_type}, ...]
+        query:[*]           = Query file or query string
+        batch_size          = Batch insert size
+        metadata:[True]     = Send metadata to ouput plugin
+        count:[True]        = Send count to ouput plugin
+
+        * either service_name or sid must be given
+        * either query or table must be given
+    """
+
     @classmethod
     def enabled(cls):
         return ENABLED
-
-    def help(self):
-        print("""
-            host:[required]     = Hostname or ip address
-            port:[1521]         = Port number
-            username            = Connection username
-            password            = Connection password or environment variable $PASSWORD
-            sid:[*]             = Record delimiter
-            serivce_name:[*]    = Count records and send to output plugin
-            table:[*]           = Table name schema.table_name or table_name
-            columns             = [{name: column_name, type: column_type}, ...]
-            query:[*]           = Query file or query string
-            batch_size          = Batch insert size
-            metadata:[True]     = Send metadata to ouput plugin
-            count:[True]        = Send count to ouput plugin
-
-            * either service_name or sid must be given
-            * either query or table must be given
-        """)
 
     @contextmanager
     def open_connection(self):

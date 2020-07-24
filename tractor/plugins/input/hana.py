@@ -16,40 +16,37 @@ logger = logging.getLogger("plugins.input.hana")
 
 
 class Hana(DbInputPlugin):
+    """
+        host:[required]     = Hostname or ip address
+        port:[1521]         = Port number
+        username            = Connection username
+        password            = Connection password or environment variable $PASSWORD
+        table:[*]           = Table name schema.table_name or table_name
+        columns             = [{name: column_name, type: column_type}, ...]
+        query:[*]           = Query file or query string
+        batch_size          = Batch insert size
+        metadata:[True]     = Send metadata to ouput plugin
+        count:[True]        = Send count to ouput plugin
+
+        * either query or table must be given
+    """
+
     @classmethod
     def enabled(cls):
         return ENABLED
 
-    def help(self):
-        print("""
-            host:[required]     = Hostname or ip address
-            port:[1521]         = Port number
-            username            = Connection username
-            password            = Connection password or environment variable $PASSWORD
-            table:[*]           = Table name schema.table_name or table_name
-            columns             = [{name: column_name, type: column_type}, ...]
-            query:[*]           = Query file or query string
-            batch_size          = Batch insert size
-            metadata:[True]     = Send metadata to ouput plugin
-            count:[True]        = Send count to ouput plugin
-
-            * either query or table must be given
-        """)
-
-
     @contextmanager
     def open_connection(self):
         connection = dbapi.connect(
-            address=self.config['host'],
-            port=self.config.get('port', 30015),
-            user=self.config['username'],
-            password=self.config['password']
+            address=self.config["host"],
+            port=self.config.get("port", 30015),
+            user=self.config["username"],
+            password=self.config["password"],
         )
         try:
             yield connection
         finally:
             connection.close()
-
 
     def run(self):
         error = None

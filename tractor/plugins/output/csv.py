@@ -8,6 +8,11 @@ from tractor.util import to_delimiter
 logger = logging.getLogger("plugins.output.csv")
 
 class Csv(OutputPlugin):
+    """
+        file:[required]          = Path to input file
+        delimiter:[,]            = Field delimiter
+        lineterminator:[\\r\\n]  = Record delimiter
+    """
 
     def run(self):
         self.prepare()

@@ -16,27 +16,25 @@ logger = logging.getLogger("plugins.input.oracle")
 
 
 class MsSql(DbInputPlugin):
+    """
+        host:[required]     = host name or ip address
+        port:[1433]         = Port number
+        username            = Connection username
+        password            = Connection password or environment variable $PASSWORD
+        database            = Database name
+        table:[*]           = Table name schema.table_name or table_name
+        columns             = [{name: column_name, type: column_type}, ...]
+        query:[*]           = Query file or query string
+        batch_size          = Batch insert size
+        metadata:[True]     = Send metadata to ouput plugin
+        count:[True]        = Send count to ouput plugin
+
+        * either query or table must be given
+    """
+
     @classmethod
     def enabled(cls):
         return ENABLED
-
-    def help(self):
-        print("""
-            host:[required]     = host name or ip address
-            port:[1433]         = Port number
-            username            = Connection username
-            password            = Connection password or environment variable $PASSWORD
-            database            = Database name
-            table:[*]           = Table name schema.table_name or table_name
-            columns             = [{name: column_name, type: column_type}, ...]
-            query:[*]           = Query file or query string
-            batch_size          = Batch insert size
-            metadata:[True]     = Send metadata to ouput plugin
-            count:[True]        = Send count to ouput plugin
-
-            * either query or table must be given
-        """)
-
 
     def count(self, conn):
         cursor = conn.cursor()

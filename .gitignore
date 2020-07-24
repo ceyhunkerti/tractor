@@ -5,3 +5,6 @@ ext
 config/app.yml
 play
 app.yml
+build
+dist
+tractor.egg-info
