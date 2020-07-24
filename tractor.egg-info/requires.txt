@@ -1,6 +1,0 @@
-click
-funcy
-PyYAML
-tqdm
-yaspin
-pathlib
