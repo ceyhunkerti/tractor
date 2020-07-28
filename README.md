@@ -78,3 +78,41 @@ Logging is controlled by `TRACTOR_LOG_LEVEL` environment variable.
 - **Oracle** `pip install cx_Oracle`
 - **MsSql** `pip install pymssql`
 - **Hana** `pip install hdbcli`
+
+#### Input Plugins
+
+**Hana**
+
+- **host**: host name or ip address
+- **port**: (optional) default 30015
+- **username**: connection user
+- **username**: connection password
+
+Source can be specified with 3 different ways:
+- **table**: name of the source table
+- **columns**: list of comma seperated columns
+
+or
+
+- **query**: select query to execute on source
+
+or
+
+- **query**: path to query file on the server where your run *tractor*
+
+
+```yml
+    input:
+        host: 192.168.68.102
+        port: 30044
+        username: XPRIMEIT
+        password: xPrimeiT4384
+
+        table: owner.table
+        columns: col_1, col_2
+        # or
+        query: select col_1, col_2 from owner.table
+        # or
+        query: /path/to/query.sql
+```
+
