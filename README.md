@@ -108,6 +108,7 @@ or
 
 - **query**: path to query file on the server where your run *tractor*
 
+Example:
 
 ```yml
     input:
