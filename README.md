@@ -83,6 +83,12 @@ Logging is controlled by `TRACTOR_LOG_LEVEL` environment variable.
 
 **Hana**
 
+Requirements:
+    - `hdbcli`
+
+You can install requirements with:
+    - `pip install hdbcli`
+
 - **host**: host name or ip address
 - **port**: (optional) default 30015
 - **username**: connection user
