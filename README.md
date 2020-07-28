@@ -89,6 +89,8 @@ Requirements:
 You can install requirements with:
 - `pip install hdbcli`
 
+Configuration parameters:
+
 - **host**: host name or ip address
 - **port**: (optional) default 30015
 - **username**: connection user
