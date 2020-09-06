@@ -1,0 +1,60 @@
+mappings:
+- Demo:
+    input:
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        service_name: orcl
+        columns: "*"
+        table: table_3
+    output:
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        table: table_5
+        columns:
+            - name: A
+              type: number
+            - name: B
+              type: date
+            - name: C
+              type: varchar2(100)
+        service_name: orcl
+        truncate: True
+- DemoCsv:
+    input:
+        plugin: Oracle
+        host: 192.168.1.196
+        username: tractor
+        password: tractor
+        service_name: orcl
+        columns: "*"
+        table: table_3
+    output:
+        plugin: Csv
+        file: /home/ceyhun/projects/lab/tractor/play/table_1.csv
+
+- DemoCsv2:
+    input:
+        plugin: Csv
+        file: /home/ceyhun/projects/lab/tractor/play/table_1.csv
+    output:
+        plugin: Csv
+        file: /home/ceyhun/projects/lab/tractor/play/target.csv
+
+- tedas_memnuniyet_verileri:
+    input:
+        plugin: MsSql
+        host: 192.168.0.206
+        username: edvars
+        password: "@!we5x-gse"
+        table: tedas_memnuniyet_verileri
+    output:
+        plugin: Oracle
+        host: 192.168.10.61
+        service_name: admdwh
+        username: primeit
+        password: pit2014
+        table: mscrm.tedas_memnuniyet_verileri

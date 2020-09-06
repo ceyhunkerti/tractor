@@ -18,7 +18,7 @@ logger = logging.getLogger("plugins.input.hana")
 class Hana(DbInputPlugin):
     """
         host:[required]     = Hostname or ip address
-        port:[30015]         = Port number
+        port:[30015]        = Port number
         username            = Connection username
         password            = Connection password or environment variable $PASSWORD
         table:[*]           = Table name schema.table_name or table_name

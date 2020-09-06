@@ -4,6 +4,7 @@ import csv
 from tractor.plugins.input.base import InputPlugin
 from tractor.plugins import registery
 from tractor.util import to_delimiter
+from tractor.settings.helpers import parse_boolean
 
 logger = logging.getLogger("plugins.input.csv")
 
@@ -18,8 +19,8 @@ class Csv(InputPlugin):
     """
 
     def count(self):
-        delimiter = to_delimiter(self.config["delimiter"])
-        lineterminator = to_delimiter(self.config["lineterminator"])
+        delimiter = to_delimiter(self.config.get("delimiter", ","))
+        lineterminator = to_delimiter(self.config.get("lineterminator", '\n'))
 
         with open(self.config["file"], "r") as handle:
             reader = csv.reader(
@@ -27,35 +28,37 @@ class Csv(InputPlugin):
             )
             count = sum(1 for _ in reader)
 
-        if self.config["header"]:
+        if parse_boolean(self.config.get("header", "true")):
             return count - 1
 
         return count
 
     def run(self):
-        if self.config["count"]:
+        if parse_boolean(self.config.get("count", "true")):
             self.send_count(self.count())
 
         with open(self.config["file"], "r") as handle:
-            delimiter = to_delimiter(self.config["delimiter"])
-            lineterminator = to_delimiter(self.config["lineterminator"])
+            delimiter = to_delimiter(self.config.get("delimiter", ","))
+            lineterminator = to_delimiter(self.config.get("lineterminator", "\n"))
 
             reader = csv.reader(
                 handle, delimiter=delimiter, lineterminator=lineterminator,
             )
-            if self.config["header"]:
+            if parse_boolean(self.config.get("header", "true")):
                 next(reader)
 
             buffer = []
             for record in reader:
                 buffer.append(record)
-                if len(buffer) >= self.config["batch_size"]:
+                if len(buffer) >= self.config.get("batch_size", 1000):
                     self.send_data(buffer)
                     buffer = []
 
             if len(buffer) > 0:
                 self.send_data(buffer)
                 buffer = []
+
+            self.done()
 
 
 registery.register(Csv)

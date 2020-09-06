@@ -19,6 +19,8 @@ def run(name):
     incls = registery.get_item(PluginType.INPUT, mapping['input']['plugin'])
     outcls = registery.get_item(PluginType.OUTPUT, mapping['output']['plugin'])
 
+    # print(incls, outcls)
+
     channel = Queue()
     _in = incls(channel, mapping['input'])
     _out = outcls(channel, mapping['output'])
