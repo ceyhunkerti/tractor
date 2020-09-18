@@ -1,6 +1,6 @@
 import os
 import yaml
-from tractor.settings import CONFIG_FILE
+from tractor.settings import CONFIG_FILE, YAML_FILE_ENCODING
 
 
 class Repository:
@@ -12,7 +12,7 @@ class Repository:
         self.snapshot = self.read()
 
     def read(self):
-        with open(self.filename) as handle:
+        with open(self.filename, encoding=YAML_FILE_ENCODING) as handle:
             data = yaml.safe_load(handle.read())
 
         if not data:

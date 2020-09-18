@@ -63,7 +63,7 @@ class GenericRdbms(OutputPlugin):
         _columns = [c['name'] if isinstance(c, dict) else c for c in columns]
         return f"""
             insert into {table} ({",".join(_columns)}) values (
-                {",".join([":" + c for c in _columns])}
+                {",".join([":" + str(i) for i in range(len(_columns))])}
             )
         """
 
@@ -134,6 +134,7 @@ class GenericRdbms(OutputPlugin):
 
             buffer = []
             query = self.build_query(conn)
+            print(query)
             cursor = conn.cursor()
             for message in self.data_channel():
                 buffer += message.content
